@@ -14,7 +14,7 @@
 
 @php
     $hasIcon = $icon !== null;
-    $inputClasses = 'w-full rounded-lg border bg-white px-4 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 transition-shadow '
+    $inputClasses = 'w-full rounded-lg border bg-white px-4 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 transition-shadow '
         . ($hasIcon ? 'pl-11' : '')
         . ($togglePassword ? ' pr-16' : '')
         . ($error ? ' border-red-400 focus:ring-red-300' : ' border-gray-300 focus:border-indigo-500 focus:ring-indigo-200');

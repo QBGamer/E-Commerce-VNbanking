@@ -76,7 +76,7 @@
     </section>
 
     {{-- Promo banner --}}
-    <section class="mx-auto max-w-7xl px-4 pb-14 sm:px-6 lg:px-8">
+    {{-- <section class="mx-auto max-w-7xl px-4 pb-14 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div class="flex items-center gap-4 rounded-2xl bg-gray-900 p-6 text-white">
                 <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/10">
@@ -106,7 +106,7 @@
                 </div>
             </div>
         </div>
-    </section>
+    </section> --}}
 
     {{-- Trending --}}
     <section class="bg-white">

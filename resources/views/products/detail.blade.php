@@ -43,10 +43,6 @@
                 <p class="text-sm font-medium uppercase tracking-wide text-gray-400">{{ $product['category_name'] }}</p>
                 <h1 class="mt-1 text-3xl font-bold tracking-tight text-gray-900">{{ $product['name'] }}</h1>
 
-                <div class="mt-3 flex items-center gap-2 text-sm">
-                    <a href="#" class="font-medium text-indigo-600 hover:underline">{{ number_format($product['reviews']) }} reviews</a>
-                </div>
-
                 <div class="mt-5 flex items-end gap-3">
                     <p class="text-4xl font-extrabold text-gray-900">${{ number_format($product['price'], 2) }}</p>
                     @if (!empty($product['old_price']))

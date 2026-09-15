@@ -12,7 +12,8 @@
                 <p class="mt-1 text-sm text-gray-500">Join ShopHub in less than a minute</p>
             </div>
 
-            <form action="#" class="space-y-5">
+            <form action="{{ route('register') }}" method="POST" class="space-y-5">
+                @csrf
                 <x-form-input name="name" label="Full name" icon="user" placeholder="Jane Doe" autocomplete="name" required />
                 <x-form-input name="email" label="Email address" type="email" icon="mail" placeholder="you@example.com" autocomplete="email" required />
                 <x-form-input name="password" label="Password" type="password" icon="lock" placeholder="At least 8 characters" autocomplete="new-password" toggle-password required />

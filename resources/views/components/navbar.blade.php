@@ -55,9 +55,6 @@
             </form>
 
             <div class="flex items-center gap-1">
-                <a href="{{ route('products.index') }}" class="inline-flex items-center justify-center rounded-lg p-2.5 text-gray-500 hover:bg-gray-100 hover:text-gray-700 lg:hidden" aria-label="Search">
-                    <x-icons name="search" class="w-6 h-6" />
-                </a>
 
                 <a href="{{ route('cart.index') }}" class="relative inline-flex items-center justify-center rounded-lg p-2.5 text-gray-700 hover:bg-gray-100" aria-label="Cart">
                     <x-icons name="cart" class="w-6 h-6" />
@@ -76,6 +73,7 @@
                         aria-label="Account"
                     >
                         <x-icons name="user" class="w-6 h-6" />
+                        <span class="hidden sm:inline">{{ Auth::user()->name ?? 'Guest' }}</span>
                         <x-icons name="chevron-down" class="hidden w-4 h-4 text-gray-400 sm:block" x-show="!open" />
                         <x-icons name="chevron-up" class="hidden w-4 h-4 text-gray-400 sm:block" x-show="open" />
                     </button>
@@ -86,31 +84,32 @@
                         x-cloak
                         class="absolute right-0 z-50 mt-2 w-56 origin-top-right rounded-xl border border-gray-200 bg-white py-1.5 shadow-xl"
                     >
-                        <p class="px-4 py-2 text-xs font-medium uppercase tracking-wide text-gray-400">{{ $user['name'] ?? 'Guest' }}</p>
-                        <a href="{{ route('account') }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
-                            <x-icons name="user" class="w-4 h-4 text-gray-400" /> My Account
-                        </a>
-                        <a href="{{ route('order-history') }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
-                            <x-icons name="package" class="w-4 h-4 text-gray-400" /> Order History
-                        </a>
-                        @if (!$user)
+                        @if (Auth::check())
+                            <a href="{{ route('account') }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
+                                <x-icons name="user" class="w-4 h-4 text-gray-400" /> My Account
+                            </a>
+                            <a href="{{ route('order-history') }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
+                                <x-icons name="package" class="w-4 h-4 text-gray-400" /> Order History
+                            </a>
                             <div class="my-1 border-t border-gray-100"></div>
+                            <a href="{{ route('logout') }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
+                                <x-icons name="logout" class="w-4 h-4 text-gray-400" /> Sign out
+                            </a>
+                            @if(Auth::user()->role=="admin" || Auth::user()->role=="manager" || Auth::user()->role=="staff")
+                            <div class="my-1 border-t border-gray-100"></div>
+                            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-500 hover:bg-gray-50">
+                                <x-icons name="dashboard" class="w-4 h-4 text-gray-400" /> Control Panel
+                            </a>
+                            @endif
+                        @else
                             <a href="{{ route('login') }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
                                 <x-icons name="chevron-right" class="w-4 h-4 text-gray-400" /> Sign in
                             </a>
                             <a href="{{ route('register') }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
                                 <x-icons name="user-plus" class="w-4 h-4 text-gray-400" /> Create account
                             </a>
-                        @else
                             <div class="my-1 border-t border-gray-100"></div>
-                            <a href="#" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
-                                <x-icons name="logout" class="w-4 h-4 text-gray-400" /> Sign out
-                            </a>
                         @endif
-                        <div class="my-1 border-t border-gray-100"></div>
-                        <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-500 hover:bg-gray-50">
-                            <x-icons name="dashboard" class="w-4 h-4 text-gray-400" /> Staff / Admin Panel
-                        </a>
                     </div>
                 </div>
             </div>

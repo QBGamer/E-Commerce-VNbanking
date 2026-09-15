@@ -12,7 +12,8 @@
                 <p class="mt-1 text-sm text-gray-500">Sign in to your account to continue</p>
             </div>
 
-            <form action="#" class="space-y-5">
+            <form action="{{ route('login') }}" method="POST" class="space-y-5">
+                @csrf
                 <x-form-input name="email" label="Email address" type="email" icon="mail" placeholder="you@example.com" autocomplete="email" required />
                 <x-form-input name="password" label="Password" type="password" icon="lock" placeholder="••••••••" autocomplete="current-password" toggle-password required />
 
@@ -31,13 +32,9 @@
 
             <p class="mt-6 text-center text-sm text-gray-500">
                 Don't have an account?
-                <a href="{{ route('register') }}" class="font-semibold text-indigo-600 hover:underline">Create one free</a>
+                <a href="{{ route('register') }}" class="font-semibold text-indigo-600 hover:underline">Create one</a>
             </p>
         </div>
-
-        <a href="{{ route('admin.dashboard') }}" class="mt-4 flex items-center justify-center gap-2 text-sm text-gray-400 hover:text-gray-600">
-            <x-icons name="dashboard" class="w-4 h-4" /> Staff? Open the Admin Panel
-        </a>
     </div>
 </div>
 @endsection

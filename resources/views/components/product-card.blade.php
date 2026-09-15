@@ -38,10 +38,6 @@
             {{ $product['name'] }}
         </a>
 
-        <div class="flex items-center gap-1">
-            <span class="text-xs text-gray-500">{{ number_format($product['reviews']) }} reviews</span>
-        </div>
-
         <div class="mt-auto flex items-end justify-between gap-2 pt-2">
             <div>
                 @if (!empty($product['old_price']))

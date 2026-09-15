@@ -22,7 +22,6 @@
         if ($sort === 'price-low') return $a['price'] <=> $b['price'];
         if ($sort === 'price-high') return $b['price'] <=> $a['price'];
         if ($sort === 'rating') return $b['rating'] <=> $a['rating'];
-        return $b['reviews'] <=> $a['reviews'];
     });
 
     $sortBase = route('products.index', ['category' => $activeCategory, 'q' => $query]) . (($activeCategory !== null || $query !== '') ? '&' : '?') . 'sort=';

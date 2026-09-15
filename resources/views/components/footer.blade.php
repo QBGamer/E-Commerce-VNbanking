@@ -4,7 +4,7 @@
 ])
 
 <footer class="border-t border-gray-200 bg-gray-50">
-    <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
             <div class="space-y-4">
                 <a href="{{ route('home') }}" class="flex items-center gap-2">
@@ -70,19 +70,10 @@
             </div>
         </div>
 
-        <div class="mt-12 flex flex-col items-center justify-between gap-4 border-t border-gray-200 pt-6 sm:flex-row">
+        <div class="mt-12 flex flex-col items-center justify-center gap-4 border-t border-gray-200 pt-6 sm:flex-row">
             <p class="text-xs text-gray-400">
                 &copy; {{ date('Y') }} {{ $storeInfo['name'] ?? 'ShopHub' }}. All rights reserved.
             </p>
-            <div class="flex items-center gap-1.5 text-gray-400">
-                <span class="text-xs">Secure payments</span>
-                <span class="flex items-center gap-1 rounded-md border border-gray-200 bg-white px-2 py-1">
-                    <x-icons name="shield-check" class="w-3.5 h-3.5" /><span class="text-[10px] font-semibold text-gray-600">SSL</span>
-                </span>
-                <span class="rounded-md border border-gray-200 bg-white px-2 py-1 text-[10px] font-semibold text-gray-600">VISA</span>
-                <span class="rounded-md border border-gray-200 bg-white px-2 py-1 text-[10px] font-semibold text-gray-600">Mastercard</span>
-                <span class="rounded-md border border-gray-200 bg-white px-2 py-1 text-[10px] font-semibold text-gray-600">VNPay</span>
-            </div>
         </div>
     </div>
 </footer>
