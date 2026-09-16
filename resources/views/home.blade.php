@@ -1,7 +1,6 @@
 @extends('layouts.app', ['title' => 'Home'])
 
 @section('content')
-    {{-- Hero --}}
     <section class="bg-indigo-600">
         <div class="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
             <div class="grid grid-cols-1 items-center gap-10 lg:grid-cols-2">
