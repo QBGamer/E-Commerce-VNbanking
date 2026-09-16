@@ -33,7 +33,7 @@
                 <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-900">Quick Links</h3>
                 <ul class="mt-4 space-y-2.5 text-sm">
                     <li><a href="{{ route('home') }}" class="text-gray-500 hover:text-indigo-600">Home</a></li>
-                    <li><a href="{{ route('products.index') }}" class="text-gray-500 hover:text-indigo-600">Shop All</a></li>
+                    <li><a href="" class="text-gray-500 hover:text-indigo-600">Shop All</a></li>
                     <li><a href="{{ route('cart.index') }}" class="text-gray-500 hover:text-indigo-600">Shopping Cart</a></li>
                     <li><a href="{{ route('order-history') }}" class="text-gray-500 hover:text-indigo-600">Order History</a></li>
                     <li><a href="{{ route('account') }}" class="text-gray-500 hover:text-indigo-600">My Account</a></li>
@@ -43,11 +43,11 @@
             <div>
                 <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-900">Categories</h3>
                 <ul class="mt-4 space-y-2.5 text-sm">
-                    @foreach ($categories as $key => $label)
+                    {{-- @foreach ($categories as $key => $label)
                         <li>
                             <a href="{{ route('products.index', ['category' => $key]) }}" class="text-gray-500 hover:text-indigo-600">{{ $label }}</a>
                         </li>
-                    @endforeach
+                    @endforeach --}}
                 </ul>
             </div>
 

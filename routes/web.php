@@ -2,8 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProductController;
 
-Route::view('/', 'home')->name('home');
+Route::get('/', [ProductController::class, 'index'])->name('home');
 
 Route::view('/login', 'auth.login')->name('login');
 Route::view('/register', 'auth.register')->name('register');
@@ -12,11 +13,9 @@ Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::view('/account', 'auth.account')->name('account');
 
-
-Route::view('/products', 'products.index')->name('products.index');
-Route::get('/products/{slug}', function ($slug) {
-    return view('products.detail', ['slug' => $slug]);
-})->name('products.detail');
+// Route::get('/products/{slug}', function ($slug) {
+//     return view('products.detail', ['slug' => $slug]);
+// })->name('products.detail');
 
 Route::view('/cart', 'cart.index')->name('cart.index');
 Route::view('/checkout', 'cart.checkout')->name('checkout');

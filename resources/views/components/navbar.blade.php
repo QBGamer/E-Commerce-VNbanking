@@ -29,13 +29,15 @@
                     <a href="{{ route('home') }}" class="rounded-lg px-3 py-2 text-sm font-medium {{ request()->routeIs('home') ? 'text-indigo-600' : 'text-gray-700 hover:bg-gray-100' }}">
                         Home
                     </a>
-                    <a href="{{ route('products.index') }}" class="rounded-lg px-3 py-2 text-sm font-medium {{ request()->routeIs('products.*') ? 'text-indigo-600' : 'text-gray-700 hover:bg-gray-100' }}">
+                    {{-- <a href="{{ route('products.index') }}" class="rounded-lg px-3 py-2 text-sm font-medium {{ request()->routeIs('products.*') ? 'text-indigo-600' : 'text-gray-700 hover:bg-gray-100' }}"> --}}
+                    <a href="" class="rounded-lg px-3 py-2 text-sm font-medium {{ request()->routeIs('products.*') ? 'text-indigo-600' : 'text-gray-700 hover:bg-gray-100' }}">
                         Shop
                     </a>
                 </nav>
             </div>
 
-            <form action="{{ route('products.index') }}" class="hidden max-w-xl flex-1 lg:block">
+            {{-- <form action="{{ route('products.index') }}" class="hidden max-w-xl flex-1 lg:block"> --}}
+            <form action="" class="hidden max-w-xl flex-1 lg:block">
                 <div class="relative">
                     <input
                         type="text"
@@ -117,7 +119,8 @@
     </div>
 
     <div class="border-t border-gray-100 px-4 py-3 lg:hidden">
-        <form action="{{ route('products.index') }}" class="relative">
+        {{-- <form action="{{ route('products.index') }}" class="relative"> --}}
+        <form action="" class="relative">
             <input
                 type="text"
                 name="q"
@@ -136,7 +139,7 @@
             <a href="{{ route('home') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-800 hover:bg-gray-50">
                 <x-icons name="home" class="w-5 h-5 text-gray-400" /> Home
             </a>
-            <a href="{{ route('products.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-800 hover:bg-gray-50">
+            <a href="" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-800 hover:bg-gray-50">
                 <x-icons name="box" class="w-5 h-5 text-gray-400" /> Shop All Products
             </a>
             <a href="{{ route('cart.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-800 hover:bg-gray-50">
@@ -146,11 +149,11 @@
                 @endif
             </a>
             <p class="px-3 pt-3 text-xs font-medium uppercase tracking-wide text-gray-400">Categories</p>
-            @foreach ($categories as $key => $label)
+            {{-- @foreach ($categories as $key => $label)
                 <a href="{{ route('products.index', ['category' => $key]) }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
                     <span class="h-1.5 w-1.5 rounded-full bg-indigo-400"></span> {{ $label }}
                 </a>
-            @endforeach
+            @endforeach --}}
         </div>
     </div>
 </header>

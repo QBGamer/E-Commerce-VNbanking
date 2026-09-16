@@ -21,7 +21,8 @@
         </span>
     @endif
 
-    <a href="{{ route('products.detail', $product['slug']) }}" class="relative aspect-square overflow-hidden bg-gray-100">
+    {{-- <a href="{{ route('products.detail', $product['slug']) }}" class="relative aspect-square overflow-hidden bg-gray-100"> --}}
+    <a href="" class="relative aspect-square overflow-hidden bg-gray-100">
         <img src="{{ $product['image'] }}" alt="{{ $product['name'] }}"
             class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
             loading="lazy" />
@@ -34,7 +35,8 @@
 
     <div class="flex flex-1 flex-col gap-2 p-4">
         <p class="text-xs font-medium uppercase tracking-wide text-gray-400">{{ $product['category_name'] }}</p>
-        <a href="{{ route('products.detail', $product['slug']) }}" class="line-clamp-2 text-sm font-semibold text-gray-900 hover:text-indigo-600">
+        {{-- <a href="{{ route('products.detail', $product['slug']) }}" class="line-clamp-2 text-sm font-semibold text-gray-900 hover:text-indigo-600"> --}}
+        <a href="" class="line-clamp-2 text-sm font-semibold text-gray-900 hover:text-indigo-600">
             {{ $product['name'] }}
         </a>
 
@@ -45,7 +47,8 @@
                 @endif
                 <p class="text-lg font-bold text-gray-900">${{ number_format($product['price'], 2) }}</p>
             </div>
-            <a href="{{ route('products.detail', $product['slug']) }}"
+            {{-- <a href="{{ route('products.detail', $product['slug']) }}" --}}
+            <a href=""
                 class="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-indigo-700 {{ $isSoldOut ? 'pointer-events-none opacity-40' : '' }}">
                 <x-icons name="cart" class="w-4 h-4" />
                 Add

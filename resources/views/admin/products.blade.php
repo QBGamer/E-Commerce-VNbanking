@@ -102,7 +102,7 @@
                             </td>
                             <td class="px-6 py-3.5">
                                 <div class="flex items-center justify-end gap-1">
-                                    <a href="{{ route('products.detail', $product['slug']) }}" class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700" title="View">
+                                    <a href="" class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700" title="View">
                                         <x-icons name="eye" class="w-4.5 h-4.5" />
                                     </a>
                                     <button type="button" class="rounded-lg p-2 text-gray-400 hover:bg-indigo-50 hover:text-indigo-600" title="Edit">
