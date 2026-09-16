@@ -1,5 +1,5 @@
 @extends('layouts.app', ['title' => 'Shop'])
-
+{{-- temp --}}
 @section('content')
 @php
     $activeCategory = request('category');
