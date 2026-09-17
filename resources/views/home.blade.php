@@ -47,15 +47,16 @@
             </a> --}}
         </div>
         <div class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-            {{-- @foreach ($categories as $key => $label)
-                <a href="{{ route('products.index', ['category' => $key]) }}"
+            @foreach ($categories as $category)
+                {{-- <a href="{{ route('products.index', ['category' => $category->slug]) }}" --}}
+                <a href=""
                     class="group flex flex-col items-center gap-3 rounded-2xl border border-gray-200 bg-white p-5 text-center transition-all hover:border-indigo-200 hover:shadow-md">
                     <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 transition-colors group-hover:bg-indigo-600 group-hover:text-white">
                         <x-icons name="box" class="w-6 h-6" />
                     </span>
-                    <span class="text-sm font-semibold text-gray-800">{{ $label }}</span>
+                    <span class="text-sm font-semibold text-gray-800">{{ $category['name'] }}</span>
                 </a>
-            @endforeach --}}
+            @endforeach
         </div>
     </section>
 

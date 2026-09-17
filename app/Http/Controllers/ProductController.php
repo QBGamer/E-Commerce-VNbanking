@@ -7,11 +7,22 @@ use App\Models\Product;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $latestProducts = Product::where('status', 'active')->orderBy('created_at', 'desc')->take(4)->get();
-        $randomProducts = Product::where('status', 'active')->inRandomOrder()->take(10)->get();
-        $trendingProducts = Product::where('status', 'active')->whereIn('badge', ['Trending','Low Stock','Sale'])->orderBy('created_at', 'desc')->take(5)->get();
-        return view('home', compact('latestProducts', 'randomProducts', 'trendingProducts'));
+        $products = Product::where('status', 'active')->get();
+        $products = $products->filter(function ($p) use ($request){
+            if($request->filled('category') && $p->category->slug != $request->category) return false;
+            if($request->filled('name') &&!str_contains(strtolower($p->name), strtolower($request->name))) return false;
+            if($request->filled('price_min') && $p->price < $request->price_min) return false;
+            if($request->filled('price_max') && $p->price > $request->price_max) return false;
+            return true;
+        });
+        // return view('products.index', compact('products', 'request'));
+        return view('products.index', [
+            'products' => $products,
+            'category' => $request->query('category'),
+            'name' => $request->trim($request->query('name'), ''),
+            'sort' => $request->query('sort_by', 'featured')
+        ]);
     }
 }

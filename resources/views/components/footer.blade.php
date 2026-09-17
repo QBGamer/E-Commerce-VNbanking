@@ -1,8 +1,3 @@
-@props([
-    'storeInfo' => [],
-    'categories' => [],
-])
-
 <footer class="border-t border-gray-200 bg-gray-50">
     <div class="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
@@ -43,11 +38,12 @@
             <div>
                 <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-900">Categories</h3>
                 <ul class="mt-4 space-y-2.5 text-sm">
-                    {{-- @foreach ($categories as $key => $label)
+                    @foreach ($categories as $category)
                         <li>
-                            <a href="{{ route('products.index', ['category' => $key]) }}" class="text-gray-500 hover:text-indigo-600">{{ $label }}</a>
+                            {{-- <a href="{{ route('products.index', ['category' => $category->slug]) }}" class="text-gray-500 hover:text-indigo-600">{{ $category->name }}</a> --}}
+                            <a href="" class="text-gray-500 hover:text-indigo-600">{{ $category->name }}</a>
                         </li>
-                    @endforeach --}}
+                    @endforeach
                 </ul>
             </div>
 
