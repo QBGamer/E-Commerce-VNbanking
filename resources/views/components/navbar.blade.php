@@ -146,11 +146,11 @@
                 @endif
             </a>
             <p class="px-3 pt-3 text-xs font-medium uppercase tracking-wide text-gray-400">Categories</p>
-            {{-- @foreach ($categories as $key => $label)
-                <a href="{{ route('products.index', ['category' => $key]) }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
+            @foreach ($categories as $slug => $label)
+                <a href="{{ route('products.index', ['category' => $slug]) }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
                     <span class="h-1.5 w-1.5 rounded-full bg-indigo-400"></span> {{ $label }}
                 </a>
-            @endforeach --}}
+            @endforeach
         </div>
     </div>
 </header>

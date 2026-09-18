@@ -10,7 +10,7 @@
 @endphp
 @section('content')
     <div class="border-b border-gray-200 bg-white">
-        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
             <nav class="flex items-center gap-1 text-sm text-gray-500">
                 <a href="{{ route('home') }}" class="hover:text-indigo-600">Home</a>
                 <x-icons name="chevron-right" class="w-4 h-4" />
@@ -29,7 +29,7 @@
         </div>
     </div>
 
-    <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
         {{-- Category filter --}}
         <div class="flex gap-2 overflow-x-auto pb-1" x-data>
             <a href="{{ route('products.index', ['query' => $query, 'sort_by' => $sort]) }}"
@@ -45,7 +45,7 @@
         </div>
 
         {{-- Toolbar --}}
-        <div class="mt-6 flex flex-wrap items-center justify-between gap-3">
+        <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
             <div class="flex items-center gap-2 text-sm text-gray-500">
                 <x-icons name="filter" class="w-4 h-4" />
                 @if ($category)
@@ -73,7 +73,7 @@
 
         {{-- Grid --}}
         @if (count($products) > 0)
-            <div class="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            <div class="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
                 @foreach ($products as $product)
                     <x-product-card :product="$product" />
                 @endforeach
