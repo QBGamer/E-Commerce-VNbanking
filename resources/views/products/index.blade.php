@@ -78,6 +78,11 @@
                     <x-product-card :product="$product" />
                 @endforeach
             </div>
+            @if ($products->hasPages())
+                <div class="mt-10 flex justify-center">
+                    {{ $products->appends(collect(request()->query())->filter(fn ($v) => $v !== null && $v !== '')->all())->links() }}
+                </div>
+            @endif
         @else
             <div class="mt-16 flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-300 bg-white px-4 py-16 text-center">
                 <span class="flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 text-gray-400">

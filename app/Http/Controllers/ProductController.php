@@ -10,34 +10,42 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $products  = Product::with('category')->where('status', 'active')->get();
         $categories = Category::orderBy('name', 'asc')->pluck('name', 'slug');
 
-        //search logic
         $category = $request->query('category');
         $validCategory = is_string($category) && $categories->has($category) ? $category : null;
         $q    = trim((string) $request->query('query', ''));
         $sort = $request->query('sort_by', 'featured');
 
-        $products = $products->filter(function ($p) use ($validCategory, $q, $request) {
-            if ($validCategory && $p->category->slug != $validCategory) return false;
-            if ($q !== '' && !str_contains(strtolower($p->name), strtolower($q))) return false;
-            if ($request->filled('price_min') && $p->price < (float) $request->query('price_min')) return false;
-            if ($request->filled('price_max') && $p->price > (float) $request->query('price_max')) return false;
-            return true;
-        });
+        $query = Product::with('category')->where('status', 'active');
 
-        if ($category && !$validCategory) {
-            $products = collect();
+        if ($validCategory) {
+            $query->whereHas('category', fn ($c) => $c->where('slug', $validCategory));
+        } elseif ($category) {
+            $query->whereRaw('1 = 0');
         }
 
-        $products = match ($sort) {
-            'price_asc'  => $products->sortBy('price'),
-            'price_desc' => $products->sortByDesc('price'),
-            'name_asc'   => $products->sortBy('name'),
-            'name_desc'  => $products->sortByDesc('name'),
-            default      => $products,
-        };
+        if ($q !== '') {
+            $query->where('name', 'like', '%' . $q . '%');
+        }
+
+        if ($request->filled('price_min')) {
+            $query->where('price', '>=', (float) $request->query('price_min'));
+        }
+        if ($request->filled('price_max')) {
+            $query->where('price', '<=', (float) $request->query('price_max'));
+        }
+
+        $query->when(true, fn ($q2) => match ($sort) {
+            'price_asc'  => $q2->orderBy('price', 'asc'),
+            'price_desc' => $q2->orderBy('price', 'desc'),
+            'name_asc'   => $q2->orderBy('name', 'asc'),
+            'name_desc'  => $q2->orderBy('name', 'desc'),
+            default      => $q2->orderBy('created_at', 'desc'),   // featured or any other value
+        });
+
+        $products = $query->simplePaginate(8);   // ← N product,(SimplePaginator)
+        // $products = $query->paginate(2);         // ← N product,(LengthAwarePaginator)
 
         return view('products.index', [
             'products'   => $products,
