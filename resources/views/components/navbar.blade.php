@@ -29,20 +29,18 @@
                     <a href="{{ route('home') }}" class="rounded-lg px-3 py-2 text-sm font-medium {{ request()->routeIs('home') ? 'text-indigo-600' : 'text-gray-700 hover:bg-gray-100' }}">
                         Home
                     </a>
-                    {{-- <a href="{{ route('products.index') }}" class="rounded-lg px-3 py-2 text-sm font-medium {{ request()->routeIs('products.*') ? 'text-indigo-600' : 'text-gray-700 hover:bg-gray-100' }}"> --}}
-                    <a href="" class="rounded-lg px-3 py-2 text-sm font-medium {{ request()->routeIs('products.*') ? 'text-indigo-600' : 'text-gray-700 hover:bg-gray-100' }}">
+                    <a href="{{ route('products.index') }}" class="rounded-lg px-3 py-2 text-sm font-medium {{ request()->routeIs('products.*') ? 'text-indigo-600' : 'text-gray-700 hover:bg-gray-100' }}">
                         Shop
                     </a>
                 </nav>
             </div>
 
-            {{-- <form action="{{ route('products.index') }}" class="hidden max-w-xl flex-1 lg:block"> --}}
-            <form action="" class="hidden max-w-xl flex-1 lg:block">
+            <form action="{{ route('products.index') }}" class="hidden max-w-xl flex-1 lg:block">
                 <div class="relative">
                     <input
                         type="text"
-                        name="q"
-                        value="{{ request('q') }}"
+                        name='query'
+                        value="{{ request('query') }}"
                         placeholder="Search products, categories..."
                         class="w-full rounded-full border border-gray-300 bg-gray-50 py-2.5 pl-11 pr-24 text-sm text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200"
                         aria-label="Search"
@@ -119,12 +117,11 @@
     </div>
 
     <div class="border-t border-gray-100 px-4 py-3 lg:hidden">
-        {{-- <form action="{{ route('products.index') }}" class="relative"> --}}
-        <form action="" class="relative">
+        <form action="{{ route('products.index') }}" class="relative">
             <input
                 type="text"
-                name="q"
-                value="{{ request('q') }}"
+                name='query'
+                value="{{ request('query') }}"
                 placeholder="Search products, categories..."
                 class="w-full rounded-full border border-gray-300 bg-gray-50 py-2.5 pl-11 pr-4 text-sm text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
             />
@@ -139,7 +136,7 @@
             <a href="{{ route('home') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-800 hover:bg-gray-50">
                 <x-icons name="home" class="w-5 h-5 text-gray-400" /> Home
             </a>
-            <a href="" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-800 hover:bg-gray-50">
+            <a href="{{ route('products.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-800 hover:bg-gray-50">
                 <x-icons name="box" class="w-5 h-5 text-gray-400" /> Shop All Products
             </a>
             <a href="{{ route('cart.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-800 hover:bg-gray-50">

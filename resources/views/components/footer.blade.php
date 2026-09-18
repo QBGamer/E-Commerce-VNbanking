@@ -38,10 +38,9 @@
             <div>
                 <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-900">Categories</h3>
                 <ul class="mt-4 space-y-2.5 text-sm">
-                    @foreach ($categories as $category)
+                    @foreach ($categories as $slug => $label)
                         <li>
-                            {{-- <a href="{{ route('products.index', ['category' => $category->slug]) }}" class="text-gray-500 hover:text-indigo-600">{{ $category->name }}</a> --}}
-                            <a href="" class="text-gray-500 hover:text-indigo-600">{{ $category->name }}</a>
+                            <a href="{{ route('products.index', ['category' => $slug]) }}" class="text-gray-500 hover:text-indigo-600">{{ $label }}</a>
                         </li>
                     @endforeach
                 </ul>

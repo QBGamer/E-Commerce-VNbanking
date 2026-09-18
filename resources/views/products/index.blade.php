@@ -1,32 +1,14 @@
 @extends('layouts.app', ['title' => 'Shop'])
 
-@section('content')
 @php
-    $activeCategory = request('category');
-    $query = trim(request('q') ?? '');
-    $sort = request('sort', 'featured');
-
-    $filtered = $products;
-    if ($activeCategory && isset($categories[$activeCategory])) {
-        $filtered = array_values(array_filter($filtered, fn($p) => $p['category'] === $activeCategory));
-    }
-    if ($query !== '') {
-        $filtered = array_values(array_filter($filtered, fn($p) =>
-            str_contains(strtolower($p['name']), strtolower($query)) ||
-            str_contains(strtolower($p['category_name']), strtolower($query)) ||
-            str_contains(strtolower($p['description']), strtolower($query))
-        ));
-    }
-
-    usort($filtered, function ($a, $b) use ($sort) {
-        if ($sort === 'price-low') return $a['price'] <=> $b['price'];
-        if ($sort === 'price-high') return $b['price'] <=> $a['price'];
-        if ($sort === 'rating') return $b['rating'] <=> $a['rating'];
-    });
-
-    $sortBase = route('products.index', ['category' => $activeCategory, 'q' => $query]) . (($activeCategory !== null || $query !== '') ? '&' : '?') . 'sort=';
+    $sortParams = array_filter(
+        ['category' => $category, 'query' => $query],
+        fn ($v) => $v !== null && $v !== ''
+    );
+    $sortBase = route('products.index', $sortParams)
+        . (count($sortParams) ? '&' : '?') . 'sort_by=';
 @endphp
-
+@section('content')
     <div class="border-b border-gray-200 bg-white">
         <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
             <nav class="flex items-center gap-1 text-sm text-gray-500">
@@ -37,26 +19,26 @@
             <h1 class="mt-2 text-2xl font-bold text-gray-900">
                 @if ($query !== '')
                     Results for "{{ $query }}"
-                @elseif ($activeCategory)
-                    {{ $categories[$activeCategory] }}
+                @elseif ($category)
+                    {{ $categories[$category] ?? $category }}
                 @else
                     All Products
                 @endif
             </h1>
-            <p class="mt-1 text-sm text-gray-500">{{ count($filtered) }} product{{ count($filtered) !== 1 ? 's' : '' }} found</p>
+            <p class="mt-1 text-sm text-gray-500">{{ count($products) }} product{{ count($products) !== 1 ? 's' : '' }} found</p>
         </div>
     </div>
 
     <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {{-- Category filter --}}
         <div class="flex gap-2 overflow-x-auto pb-1" x-data>
-            <a href="{{ route('products.index', ['q' => $query]) }}"
-                class="shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors {{ !$activeCategory ? 'bg-indigo-600 text-white' : 'border border-gray-300 bg-white text-gray-700 hover:border-indigo-300' }}">
+            <a href="{{ route('products.index', ['query' => $query, 'sort_by' => $sort]) }}"
+                class="shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors {{ !$category ? 'bg-indigo-600 text-white' : 'border border-gray-300 bg-white text-gray-700 hover:border-indigo-300' }}">
                 All
             </a>
-            @foreach ($categories as $key => $label)
-                <a href="{{ route('products.index', ['category' => $key, 'q' => $query]) }}"
-                    class="shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors {{ $activeCategory === $key ? 'bg-indigo-600 text-white' : 'border border-gray-300 bg-white text-gray-700 hover:border-indigo-300' }}">
+            @foreach ($categories as $slug => $label)
+                <a href="{{ route('products.index', ['category' => $slug, 'query' => $query, 'sort_by' => $sort]) }}"
+                    class="shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors {{ $category === $slug ? 'bg-indigo-600 text-white' : 'border border-gray-300 bg-white text-gray-700 hover:border-indigo-300' }}">
                     {{ $label }}
                 </a>
             @endforeach
@@ -66,9 +48,9 @@
         <div class="mt-6 flex flex-wrap items-center justify-between gap-3">
             <div class="flex items-center gap-2 text-sm text-gray-500">
                 <x-icons name="filter" class="w-4 h-4" />
-                @if ($activeCategory)
-                    <span>Category: <strong class="text-gray-800">{{ $categories[$activeCategory] }}</strong></span>
-                    <a href="{{ route('products.index', ['q' => $query]) }}" class="text-indigo-600 hover:underline">Clear</a>
+                @if ($category)
+                    <span>Category: <strong class="text-gray-800">{{ $categories[$category] ?? $category }}</strong></span>
+                    <a href="{{ route('products.index', ['query' => $query]) }}" class="text-indigo-600 hover:underline">Clear</a>
                 @endif
             </div>
 
@@ -80,19 +62,19 @@
                     @change="window.location = '{{ $sortBase }}' + sort"
                     class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
                 >
-                    <option value="featured">Featured</option>
-                    <option value="popular">Most Popular</option>
-                    <option value="rating">Highest Rated</option>
-                    <option value="price-low">Price: Low to High</option>
-                    <option value="price-high">Price: High to Low</option>
+                    <option value="">Featured</option>
+                    <option value="price_asc">Price: Low to High</option>
+                    <option value="price_desc">Price: High to Low</option>
+                    <option value="name_asc">Name: A to Z</option>
+                    <option value="name_desc">Name: Z to A</option>
                 </select>
             </div>
         </div>
 
         {{-- Grid --}}
-        @if (count($filtered) > 0)
+        @if (count($products) > 0)
             <div class="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-                @foreach ($filtered as $product)
+                @foreach ($products as $product)
                     <x-product-card :product="$product" />
                 @endforeach
             </div>
