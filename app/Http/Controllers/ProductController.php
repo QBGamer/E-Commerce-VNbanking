@@ -55,4 +55,31 @@ class ProductController extends Controller
             'sort'       => $sort,
         ]);
     }
+
+    public function show($slug)
+    {
+        $product = Product::with('category')->where('slug', $slug)->firstOrFail();
+        $categories = Category::orderBy('name', 'asc')->pluck('name', 'slug');
+        $relatedProducts = Product::where('status', 'active')
+            ->where('category_id', $product->category_id)
+            ->where('id', '!=', $product->id)
+            ->inRandomOrder()
+            ->take(4)
+            ->get();
+        if (count($relatedProducts) < 4) {
+            $additionalProducts = Product::where('status', 'active')
+                ->where('id', '!=', $product->id)
+                ->whereNotIn('id', $relatedProducts->pluck('id'))
+                ->inRandomOrder()
+                ->take(4 - count($relatedProducts))
+                ->get();
+            $relatedProducts = $relatedProducts->merge($additionalProducts);
+        }
+
+        return view('products.detail', [
+            'product'    => $product,
+            'categories' => $categories,
+            'relatedProducts' => $relatedProducts,
+        ]);
+    }
 }

@@ -1,28 +1,16 @@
 @extends('layouts.app', ['title' => 'Product'])
 
-@section('content')
 @php
-    $product = collect($products)->firstWhere('slug', $slug ?? '') ?? $products[0];
-    $related = collect($products)
-        ->where('category', $product['category'])
-        ->where('id', '!=', $product['id'])
-        ->take(4)
-        ->all();
-
-    if (count($related) < 4) {
-        $related = collect($products)->where('id', '!=', $product['id'])->take(4)->all();
-    }
-
-    $isSoldOut = $product['stock'] <= 0;
+    $isSoldOut = ($product['stock'] ?? 1) <= 0;
 @endphp
-
+@section('content')
     <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <nav class="flex items-center gap-1 text-sm text-gray-500">
             <a href="{{ route('home') }}" class="hover:text-indigo-600">Home</a>
             <x-icons name="chevron-right" class="w-4 h-4" />
             <a href="{{ route('products.index') }}" class="hover:text-indigo-600">Shop</a>
             <x-icons name="chevron-right" class="w-4 h-4" />
-            <a href="{{ route('products.index', ['category' => $product['category']]) }}" class="hover:text-indigo-600">{{ $product['category_name'] }}</a>
+            <a href="{{ route('products.index', ['category' => $product['category']['slug']]) }}" class="hover:text-indigo-600">{{ $product['category']['name'] }}</a>
             <x-icons name="chevron-right" class="w-4 h-4" />
             <span class="truncate font-medium text-gray-900">{{ $product['name'] }}</span>
         </nav>
@@ -89,7 +77,7 @@
                     </button>
                 </div>
 
-                <div class="mt-8 space-y-3 rounded-2xl border border-gray-200 bg-white p-5 text-sm">
+                {{-- <div class="mt-8 space-y-3 rounded-2xl border border-gray-200 bg-white p-5 text-sm">
                     <div class="flex items-center gap-3 text-gray-600">
                         <x-icons name="truck" class="w-5 h-5 text-indigo-600" />
                         <span><strong class="text-gray-800">Free shipping</strong> on orders over $50</span>
@@ -102,21 +90,21 @@
                         <x-icons name="shield-check" class="w-5 h-5 text-indigo-600" />
                         <span><strong class="text-gray-800">Secure checkout</strong> with encrypted payment</span>
                     </div>
-                </div>
+                </div> --}}
             </div>
         </div>
 
-        {{-- Related --}}
-        @if (count($related) > 0)
+        {{-- relatedProducts --}}
+        @if (count($relatedProducts) > 0)
             <div class="mt-16">
                 <div class="flex items-center justify-between gap-4">
                     <h2 class="text-xl font-bold text-gray-900">You may also like</h2>
-                    <a href="{{ route('products.index', ['category' => $product['category']]) }}" class="inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 hover:text-indigo-700">
+                    <a href="{{ route('products.index', ['category' => $product['category']['slug']]) }}" class="inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 hover:text-indigo-700">
                         View all <x-icons name="arrow-right" class="w-4 h-4" />
                     </a>
                 </div>
                 <div class="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-                    @foreach ($related as $item)
+                    @foreach ($relatedProducts as $item)
                         <x-product-card :product="$item" />
                     @endforeach
                 </div>
