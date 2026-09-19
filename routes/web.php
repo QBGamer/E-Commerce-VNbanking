@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\CartItemsController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -17,7 +18,9 @@ Route::view('/account', 'auth.account')->name('account');
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 Route::get('/products/{slug}', [ProductController::class, 'show'])->name('products.detail');
 
-Route::view('/cart', 'cart.index')->name('cart.index');
+Route::get('/cart', [CartItemsController::class, 'index'])->name('cart.index');
+
+// Route::view('/cart', 'cart.index')->name('cart.index');
 Route::view('/checkout', 'cart.checkout')->name('checkout');
 Route::view('/order-history', 'cart.order-history')->name('order-history');
 
