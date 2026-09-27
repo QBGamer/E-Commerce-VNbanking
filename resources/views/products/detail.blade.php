@@ -64,17 +64,17 @@
                         <button type="button" class="flex h-12 w-12 items-center justify-center text-gray-500 hover:text-gray-900" @click="qty = Math.max(1, qty - 1)" aria-label="Decrease quantity">
                             <x-icons name="minus" class="w-4 h-4" />
                         </button>
-                        <span class="w-10 text-center text-sm font-bold text-gray-900" x-text="qty">1</span>
+                        <span id="qty" class="w-10 text-center text-sm font-bold text-gray-900" x-text="qty">1</span>
                         <button type="button" class="flex h-12 w-12 items-center justify-center text-gray-500 hover:text-gray-900" @click="qty = qty + 1" aria-label="Increase quantity">
                             <x-icons name="plus" class="w-4 h-4" />
                         </button>
                     </div>
-                    <x-button :disabled="$isSoldOut" href="{{ route('cart.index') }}" icon="cart" class="flex-1 !py-3">
+                    <x-button id="add-to-cart" :disabled="$isSoldOut" icon="cart" class="flex-1 !py-3">
                         Add to Cart
                     </x-button>
-                    <button type="button" class="inline-flex h-12 w-12 items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-500 transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600" aria-label="Add to wishlist">
+                    {{-- <button type="button" class="inline-flex h-12 w-12 items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-500 transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600" aria-label="Add to wishlist">
                         <x-icons name="heart" class="w-5 h-5" />
-                    </button>
+                    </button> --}}
                 </div>
 
                 {{-- <div class="mt-8 space-y-3 rounded-2xl border border-gray-200 bg-white p-5 text-sm">
@@ -111,4 +111,37 @@
             </div>
         @endif
     </div>
+    <script>
+        document.querySelector('#add-to-cart').addEventListener('click', function() {
+            const productId = {{ $product['id'] }};
+            const quantity = document.getElementById('qty').textContent;
+            fetch(`/cart`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ product_id: productId, quantity: quantity })
+            })
+            .then(response => {
+                if (response.status === 200) {
+                    return response.json();
+                }
+                else if (response.status === 401) {
+                    window.location.href = '/login'; // Redirect to login page
+                    throw new Error('Unauthorized. Please log in to add products to your cart.');
+                } else if (response.status === 422) {
+                    throw new Error('Validation error. Please check the product details and try again.');
+                } else {
+                    throw new Error('Failed to add product to cart.');
+                }
+            })
+            .then(data => {
+                if (data.message) console.log(data.message);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
 @endsection

@@ -23,7 +23,7 @@
                     <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white">
                         <ul class="divide-y divide-gray-100">
                             @foreach ($cartItems as $item)
-                                <li class="flex gap-4 p-4 sm:p-5" x-data="{ quantity: {{ $item['quantity'] }} }">
+                                <li id="item-{{ $item['id'] }}" class="flex gap-4 p-4 sm:p-5" x-data="{ quantity: {{ $item['quantity'] }} }">
                                     <a href="{{ route('products.detail', $item['product']['slug']) }}" class="block h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-gray-200 sm:h-24 sm:w-24">
                                         <img src="{{ $item['product']['image'] }}" alt="{{ $item['product']['name'] }}" class="h-full w-full object-cover" />
                                     </a>
@@ -36,17 +36,17 @@
                                                 </a>
                                                 <p class="mt-1 text-sm text-gray-500">Unit: <span class="font-semibold text-gray-800">${{ number_format($item['product']['price'], 2) }}</span></p>
                                             </div>
-                                            <button type="button" class="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600" aria-label="Remove item">
+                                            <button id="remove-item" data-item-id="{{ $item['id'] }}" type="button" class="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600" aria-label="Remove item">
                                                 <x-icons name="trash" class="w-5 h-5" />
                                             </button>
                                         </div>
                                         <div class="mt-auto flex items-center justify-between pt-3">
                                             <div class="flex items-center rounded-lg border border-gray-300">
-                                                <button type="button" class="flex h-9 w-9 items-center justify-center text-gray-500 hover:text-gray-900" @click="quantity = Math.max(1, quantity - 1)" aria-label="Decrease">
+                                                <button type="button" class="flex h-9 w-9 items-center justify-center text-gray-500 hover:text-gray-900" @click.debounce.500ms="updateCartItem({{ $item['id'] }}, quantity)" @click="quantity = Math.max(1, quantity - 1)" aria-label="Decrease">
                                                     <x-icons name="minus" class="w-3.5 h-3.5" />
                                                 </button>
                                                 <span class="w-8 text-center text-sm font-bold" x-text="quantity"></span>
-                                                <button type="button" class="flex h-9 w-9 items-center justify-center text-gray-500 hover:text-gray-900" @click="quantity = quantity + 1" aria-label="Increase">
+                                                <button type="button" class="flex h-9 w-9 items-center justify-center text-gray-500 hover:text-gray-900" @click.debounce.500ms="updateCartItem({{ $item['id'] }}, quantity)" @click="quantity = quantity + 1" aria-label="Increase">
                                                     <x-icons name="plus" class="w-3.5 h-3.5" />
                                                 </button>
                                             </div>
@@ -79,8 +79,8 @@
                         <h2 class="text-lg font-bold text-gray-900">Order Summary</h2>
                         <dl class="mt-5 space-y-3 text-sm">
                             <div class="flex justify-between">
-                                <dt class="text-gray-500">Subtotal ({{ count($cartItems) }} items)</dt>
-                                <dd class="font-semibold text-gray-900">${{ number_format($subtotal, 2) }}</dd>
+                                <dt id="subtotal-label" class="text-gray-500">Subtotal ({{ count($cartItems) }} items)</dt>
+                                <dd id="subtotal" class="font-semibold text-gray-900">${{ number_format($subtotal, 2) }}</dd>
                             </div>
                             {{-- <div class="flex justify-between">
                                 <dt class="text-gray-500">Shipping</dt>
@@ -94,7 +94,7 @@
                             </div> --}}
                             <div class="flex justify-between border-t border-gray-100 pt-3 text-base">
                                 <dt class="font-bold text-gray-900">Total</dt>
-                                <dd class="font-bold text-indigo-600">${{ number_format($total, 2) }}</dd>
+                                <dd id="total" class="font-bold text-indigo-600">${{ number_format($total, 2) }}</dd>
                             </div>
                         </dl>
                         {{-- @if ($shipping == 0)
@@ -126,4 +126,71 @@
             </div>
         @endif
     </div>
+    <script>
+        document.querySelectorAll('#remove-item').forEach(button => {
+            button.addEventListener('click', function() {
+                const itemId = this.getAttribute('data-item-id');
+                fetch(`/cart/${itemId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (response.status === 200) {
+                        document.getElementById(`item-${itemId}`).remove();
+                        return response.json();
+                    } else if (response.status === 401) {
+                        window.location.href = '/login'; // Redirect to login page
+                        throw new Error('Unauthorized. Please log in to add products to your cart.');
+                    } else {
+                        console.error('Failed to remove item from cart.');
+                    }
+                })
+                .then(data => {
+                    if (data.subtotal !== undefined && data.total !== undefined && data.count !== undefined) {
+                        document.getElementById('subtotal').textContent = '$' + data.subtotal;
+                        document.getElementById('total').textContent = '$' + data.total;
+                        document.getElementById('subtotal-label').textContent = 'Subtotal (' + data.count + ' items)';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            });
+        });
+
+        function updateCartItem(itemId, quantity) {
+            fetch(`/cart/${itemId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ quantity: quantity })
+            })
+            .then(response => {
+                if (response.status === 200) {
+                    // console.log('Cart item updated successfully.');
+                    return response.json();
+                } else if (response.status === 401) {
+                    window.location.href = '/login'; // Redirect to login page
+                    throw new Error('Unauthorized. Please log in to update your cart.');
+                } else {
+                    throw new Error('Failed to update cart item.');
+                }
+            })
+            .then(data => {
+                if (data.subtotal !== undefined && data.total !== undefined && data.count !== undefined) {
+                    document.getElementById('subtotal').textContent = '$' + data.subtotal;
+                    document.getElementById('total').textContent = '$' + data.total;
+                    document.getElementById('subtotal-label').textContent = 'Subtotal (' + data.count + ' items)';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
 @endsection
