@@ -140,6 +140,7 @@
                 .then(response => {
                     if (response.status === 200) {
                         document.getElementById(`item-${itemId}`).remove();
+                        Alpine.store('toasts').notify('Item removed from cart.', 'success');
                         return response.json();
                     } else if (response.status === 401) {
                         window.location.href = '/login'; // Redirect to login page

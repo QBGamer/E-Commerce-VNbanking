@@ -125,6 +125,7 @@
             })
             .then(response => {
                 if (response.status === 200) {
+                    Alpine.store('toasts').notify('Cart added!', 'success');
                     return response.json();
                 }
                 else if (response.status === 401) {
