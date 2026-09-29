@@ -18,19 +18,23 @@ Route::view('/account', 'auth.account')->name('account');
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 Route::get('/products/{slug}', [ProductController::class, 'show'])->name('products.detail');
 
-Route::get('/cart', [CartItemsController::class, 'index'])->name('cart.index');
-Route::post('/cart', [CartItemsController::class, 'store'])->name('cart.store');
-Route::put('/cart/{id}', [CartItemsController::class, 'update'])->name('cart.update');
-Route::delete('/cart/{id}', [CartItemsController::class, 'destroy'])->name('cart.destroy');
+Route::prefix('cart')->name('cart.')->middleware('auth')->group(function () {
+    Route::get('/', [CartItemsController::class, 'index'])->name('index');
+    Route::post('/', [CartItemsController::class, 'store'])->name('store');
+    Route::put('/{id}', [CartItemsController::class, 'update'])->name('update');
+    Route::delete('/{id}', [CartItemsController::class, 'destroy'])->name('destroy');
+});
 
+Route::prefix('control-panel')->name('controlpanel.')->middleware(['auth', 'can:access-control-panel'])->group(function () {
+    Route::view('/', 'controlpanel.dashboard')->name('dashboard');
+    Route::view('/products', 'controlpanel.products')->name('products');
+    Route::view('/orders', 'controlpanel.orders')->name('orders');
+    Route::view('/customers', 'controlpanel.customers')->name('customers');
+    Route::view('/coupons', 'controlpanel.coupons')->name('coupons');
+    Route::view('/settings', 'controlpanel.settings')->name('settings');
+});
 
-// Route::view('/cart', 'cart.index')->name('cart.index');
 Route::view('/checkout', 'cart.checkout')->name('checkout');
 Route::view('/order-history', 'cart.order-history')->name('order-history');
 
-Route::view('/admin', 'admin.dashboard')->name('admin.dashboard');
-Route::view('/admin/products', 'admin.products')->name('admin.products');
-Route::view('/admin/orders', 'admin.orders')->name('admin.orders');
-Route::view('/admin/customers', 'admin.customers')->name('admin.customers');
-Route::view('/admin/coupons', 'admin.coupons')->name('admin.coupons');
-Route::view('/admin/settings', 'admin.settings')->name('admin.settings');
+

@@ -143,7 +143,7 @@
                         Alpine.store('toasts').notify('Item removed from cart.', 'success');
                         return response.json();
                     } else if (response.status === 401) {
-                        window.location.href = '/login'; // Redirect to login page
+                        // window.location.href = '/login'; // Redirect to login page
                         throw new Error('Unauthorized. Please log in to add products to your cart.');
                     } else {
                         console.error('Failed to remove item from cart.');
@@ -176,7 +176,7 @@
                     // console.log('Cart item updated successfully.');
                     return response.json();
                 } else if (response.status === 401) {
-                    window.location.href = '/login'; // Redirect to login page
+                    // window.location.href = '/login'; // Redirect to login page
                     throw new Error('Unauthorized. Please log in to update your cart.');
                 } else {
                     throw new Error('Failed to update cart item.');

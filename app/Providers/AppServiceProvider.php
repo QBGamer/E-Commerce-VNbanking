@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Support\DemoData;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Gate;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -22,5 +23,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         View::share(DemoData::data());
+        Gate::define('access-control-panel', function ($user) {
+            return in_array($user->role, ['admin', 'manager']);
+        });
     }
 }

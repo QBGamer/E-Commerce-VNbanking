@@ -129,7 +129,7 @@
                     return response.json();
                 }
                 else if (response.status === 401) {
-                    window.location.href = '/login'; // Redirect to login page
+                    // window.location.href = '/login'; // Redirect to login page
                     throw new Error('Unauthorized. Please log in to add products to your cart.');
                 } else if (response.status === 422) {
                     throw new Error('Validation error. Please check the product details and try again.');

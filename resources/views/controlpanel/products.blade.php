@@ -1,4 +1,4 @@
-@extends('admin.layouts.app', ['title' => 'Products'])
+@extends('controlpanel.layouts.app', ['title' => 'Products'])
 
 @section('content')
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

@@ -1,4 +1,4 @@
-@extends('admin.layouts.app', ['title' => 'Dashboard'])
+@extends('controlpanel.layouts.app', ['title' => 'Dashboard'])
 
 @section('content')
     @php
@@ -39,7 +39,7 @@
         <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white xl:col-span-2">
             <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4">
                 <h2 class="font-semibold text-gray-900">Recent Orders</h2>
-                <a href="{{ route('admin.orders') }}" class="text-sm font-semibold text-indigo-600 hover:underline">View all</a>
+                <a href="{{ route('controlpanel.orders') }}" class="text-sm font-semibold text-indigo-600 hover:underline">View all</a>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm">
@@ -83,7 +83,7 @@
         <div class="rounded-2xl border border-gray-200 bg-white">
             <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4">
                 <h2 class="font-semibold text-gray-900">Low Stock Products</h2>
-                <a href="{{ route('admin.products') }}" class="text-sm font-semibold text-indigo-600 hover:underline">Manage</a>
+                <a href="{{ route('controlpanel.products') }}" class="text-sm font-semibold text-indigo-600 hover:underline">Manage</a>
             </div>
             <ul class="divide-y divide-gray-100">
                 @foreach ($lowStock as $product)
@@ -135,7 +135,7 @@
                             <p class="text-sm font-medium text-gray-800">{{ $order['id'] }} · {{ $order['customer'] }}</p>
                             <p class="text-xs text-gray-400">${{ number_format($order['total'], 2) }} · {{ $order['status'] }}</p>
                         </div>
-                        <x-button size="sm" variant="outline" href="{{ route('admin.orders') }}">View</x-button>
+                        <x-button size="sm" variant="outline" href="{{ route('controlpanel.orders') }}">View</x-button>
                     </div>
                 @endforeach
             </div>

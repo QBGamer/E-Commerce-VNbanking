@@ -12,10 +12,10 @@
     <div x-cloak x-show="sidebarOpen" @click="sidebarOpen = false" x-transition.opacity class="fixed inset-0 z-40 bg-gray-900/50 lg:hidden"></div>
 
     <div class="flex h-full overflow-hidden">
-        @include('admin.layouts.sidebar')
+        @include('controlpanel.layouts.sidebar')
 
         <div class="flex min-w-0 flex-1 flex-col">
-            @include('admin.layouts.header')
+            @include('controlpanel.layouts.header')
 
             <main class="flex-1 overflow-y-auto">
                 <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
