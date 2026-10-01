@@ -119,6 +119,7 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json',
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 },
                 body: JSON.stringify({ product_id: productId, quantity: quantity })
@@ -129,7 +130,8 @@
                     return response.json();
                 }
                 else if (response.status === 401) {
-                    // window.location.href = '/login'; // Redirect to login page
+                    Alpine.store('toasts').notify('Unauthorized. Please log in to add products to your cart.', 'error');
+                    setTimeout(() => window.location.href = '{{ route('login') }}', 1200);
                     throw new Error('Unauthorized. Please log in to add products to your cart.');
                 } else if (response.status === 422) {
                     throw new Error('Validation error. Please check the product details and try again.');
