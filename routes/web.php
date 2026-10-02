@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartItemsController;
+use App\Http\Controllers\ControlPanelController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -27,7 +28,7 @@ Route::prefix('cart')->name('cart.')->middleware('auth')->group(function () {
 
 Route::prefix('control-panel')->name('controlpanel.')->middleware(['auth', 'can:access-control-panel'])->group(function () {
     Route::view('/', 'controlpanel.dashboard')->name('dashboard');
-    Route::view('/products', 'controlpanel.products')->name('products');
+    Route::get('/products', [ControlPanelController::class, 'products'])->name('products');
     Route::view('/orders', 'controlpanel.orders')->name('orders');
     Route::view('/customers', 'controlpanel.customers')->name('customers');
     Route::view('/coupons', 'controlpanel.coupons')->name('coupons');

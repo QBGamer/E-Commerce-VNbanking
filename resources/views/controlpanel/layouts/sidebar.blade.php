@@ -43,8 +43,8 @@
         <div class="mt-2 flex items-center gap-3 rounded-xl bg-gray-50 px-3 py-2.5">
             <span class="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-600 text-sm font-bold text-white">AD</span>
             <div class="min-w-0 leading-tight">
-                <p class="truncate text-sm font-semibold text-gray-900">Admin Demo</p>
-                <p class="truncate text-xs text-gray-400">admin@shophub.demo</p>
+                <p class="truncate text-sm font-semibold text-gray-900">{{ Auth::user()->name }}</p>
+                <p class="truncate text-xs text-gray-400">{{ Auth::user()->email }}</p>
             </div>
         </div>
     </div>

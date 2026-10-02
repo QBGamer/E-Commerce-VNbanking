@@ -45,19 +45,81 @@
         </form>
     </div>
 
-    {{-- Filter tabs --}}
-    <div class="mt-6 flex flex-wrap items-center justify-between gap-3">
-        <div class="flex flex-wrap gap-2">
-            <button type="button" class="rounded-full bg-indigo-600 px-4 py-2 text-sm font-medium text-white">All</button>
-            <button type="button" class="rounded-full border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:border-indigo-300">Active</button>
-            <button type="button" class="rounded-full border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:border-indigo-300">Low Stock</button>
-            <button type="button" class="rounded-full border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:border-indigo-300">Out of Stock</button>
+    {{-- Filter bar --}}
+    <div class="mt-6 rounded-2xl border border-gray-200 bg-white p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex flex-wrap gap-2">
+                @php
+                    $isAll = !request()->query('stock') && !request()->query('status');
+                    $isActive = request()->query('status') === 'active';
+                    $isLow = request()->query('stock') === 'low';
+                    $isOut = request()->query('status') === 'inactive';
+                    $chip = fn ($active) => $active
+                        ? 'bg-indigo-600 text-white'
+                        : 'border border-gray-300 bg-white text-gray-600 hover:border-indigo-300';
+                @endphp
+                <a href="{{ route('controlpanel.products') }}" class="rounded-full px-4 py-2 text-sm font-medium {{ $chip($isAll) }}">All</a>
+                <a href="{{ $queryUrl(['status' => 'active']) }}" class="rounded-full px-4 py-2 text-sm font-medium {{ $chip($isActive) }}">Active</a>
+                <a href="{{ $queryUrl(['stock' => 'low']) }}" class="rounded-full px-4 py-2 text-sm font-medium {{ $chip($isLow) }}">Low Stock</a>
+                <a href="{{ $queryUrl(['status' => 'inactive']) }}" class="rounded-full px-4 py-2 text-sm font-medium {{ $chip($isOut) }}">Out of Stock</a>
+            </div>
+            <p class="text-sm text-gray-500">
+                @if (count($products))
+                    Showing <span class="font-semibold text-gray-800">{{ count($products) }}</span> of {{ $total }} products
+                @else
+                    No results
+                @endif
+            </p>
         </div>
-        <form action="#" class="relative">
-            <input type="text" placeholder="Search products..." class="w-full rounded-lg border border-gray-200 bg-white py-2 pl-10 pr-4 text-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 sm:w-64" />
-            <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
-                <x-icons name="search" class="w-4.5 h-4.5" />
-            </span>
+
+        <form method="GET" action="{{ route('controlpanel.products') }}" class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
+            {{-- Product --}}
+            <div class="sm:col-span-2">
+                <label class="mb-1.5 block text-sm font-medium text-gray-700">Product</label>
+                <input type="text" name="q" value="{{ request('q') }}" placeholder="Search by name..." class="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200" />
+            </div>
+            {{-- Category --}}
+            <div class="sm:col-span-2">
+                <label class="mb-1.5 block text-sm font-medium text-gray-700">Category</label>
+                <select name="category" class="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+                    <option value="">All categories</option>
+                    @foreach ($categories as $key => $label)
+                        <option value="{{ $key }}" @selected(request('category') === $key)>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+            {{-- Price --}}
+            <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700">Min price</label>
+                <input type="number" name="price_min" min="0" step="0.01" value="{{ request('price_min') }}" placeholder="0" class="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200" />
+            </div>
+            <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700">Max price</label>
+                <input type="number" name="price_max" min="0" step="0.01" value="{{ request('price_max') }}" placeholder="Any" class="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200" />
+            </div>
+            {{-- Stock --}}
+            <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700">Stock</label>
+                <select name="stock" class="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+                    <option value="">Any</option>
+                    <option value="low" @selected(request('stock') === 'low')>Low (1&ndash;10)</option>
+                    <option value="out" @selected(request('stock') === 'out')>Out of stock</option>
+                </select>
+            </div>
+            {{-- Status --}}
+            <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700">Status</label>
+                <select name="status" class="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+                    <option value="">Any</option>
+                    <option value="active" @selected(request('status') === 'active')>Active</option>
+                    <option value="inactive" @selected(request('status') === 'inactive')>Inactive</option>
+                </select>
+            </div>
+            {{-- Actions --}}
+            <div class="flex flex-wrap items-end gap-2 sm:col-span-2 lg:col-span-2">
+                <x-button type="submit">Apply Filters</x-button>
+                <a href="{{ route('controlpanel.products') }}" class="inline-flex items-center rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50">Reset</a>
+            </div>
         </form>
     </div>
 
@@ -76,7 +138,7 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
-                    @foreach ($products as $product)
+                    @forelse ($products as $product)
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 py-3.5">
                                 <div class="flex items-center gap-3">
@@ -114,7 +176,13 @@
                                 </div>
                             </td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="6" class="px-6 py-12 text-center text-sm text-gray-500">
+                                No products match your filters. Try adjusting or resetting them.
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
