@@ -84,26 +84,26 @@
                 <select name="category" class="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
                     <option value="">All categories</option>
                     @foreach ($categories as $key => $label)
-                        <option value="{{ $key }}" @selected(request('category') === $key)>{{ $label }}</option>
+                        <option value="{{ $key }}" @selected($category === $key)>{{ $label }}</option>
                     @endforeach
                 </select>
             </div>
             {{-- Price --}}
             <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700">Min price</label>
-                <input type="number" name="price_min" min="0" step="0.01" value="{{ request('price_min') }}" placeholder="0" class="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200" />
+                <input type="number" name="price_min" min="0" step="0.01" value="{{ $price_min }}" placeholder="0" class="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200" />
             </div>
             <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700">Max price</label>
-                <input type="number" name="price_max" min="0" step="0.01" value="{{ request('price_max') }}" placeholder="Any" class="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200" />
+                <input type="number" name="price_max" min="0" step="0.01" value="{{ $price_max }}" placeholder="Any" class="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200" />
             </div>
             {{-- Stock --}}
             <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700">Stock</label>
                 <select name="stock" class="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
                     <option value="">Any</option>
-                    <option value="low" @selected(request('stock') === 'low')>Low (1&ndash;10)</option>
-                    <option value="out" @selected(request('stock') === 'out')>Out of stock</option>
+                    <option value="low" @selected($stock === 'low')>Low (1&ndash;10)</option>
+                    <option value="out" @selected($stock === 'out')>Out of stock</option>
                 </select>
             </div>
             {{-- Status --}}
@@ -111,8 +111,8 @@
                 <label class="mb-1.5 block text-sm font-medium text-gray-700">Status</label>
                 <select name="status" class="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
                     <option value="">Any</option>
-                    <option value="active" @selected(request('status') === 'active')>Active</option>
-                    <option value="inactive" @selected(request('status') === 'inactive')>Inactive</option>
+                    <option value="active" @selected($status === 'active')>Active</option>
+                    <option value="inactive" @selected($status === 'inactive')>Inactive</option>
                 </select>
             </div>
             {{-- Actions --}}
@@ -122,6 +122,11 @@
             </div>
         </form>
     </div>
+    @if ($products->hasPages())
+        <div class="mt-10 flex justify-center">
+            {{ $products->appends(collect(request()->query())->filter(fn ($v) => $v !== null && $v !== '')->all())->links() }}
+        </div>
+    @endif
 
     {{-- Table --}}
     <div class="mt-4 overflow-hidden rounded-2xl border border-gray-200 bg-white">
@@ -143,11 +148,14 @@
                             <td class="px-6 py-3.5">
                                 <div class="flex items-center gap-3">
                                     <img src="{{ $product['image'] }}" alt="{{ $product['name'] }}" class="h-10 w-10 rounded-lg border border-gray-100 object-cover" />
-                                    <span class="font-medium text-gray-800">{{ $product['name'] }}</span>
+                                    <div>
+                                        <span class="block font-medium text-gray-800">{{ $product['name'] }}</span>
+                                        <span class="block font-xs text-gray-500">{{ $product['sku'] }}</span>
+                                    </div>
                                 </div>
                             </td>
                             <td class="px-6 py-3.5">
-                                <span class="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-600">{{ $product['category_name'] }}</span>
+                                <span class="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-600">{{ $product['category']['name'] }}</span>
                             </td>
                             <td class="px-6 py-3.5 font-medium text-gray-900">${{ number_format($product['price'], 2) }}</td>
                             <td class="px-6 py-3.5">
@@ -156,7 +164,7 @@
                                 </span>
                             </td>
                             <td class="px-6 py-3.5">
-                                @if ($product['stock'] === 0)
+                                @if ($product['status'] !== 'active')
                                     <span class="rounded-full bg-red-100 px-2.5 py-1 text-xs font-semibold text-red-700">Inactive</span>
                                 @else
                                     <span class="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700">Active</span>
@@ -187,9 +195,13 @@
             </table>
         </div>
     </div>
-
+    @if ($products->hasPages())
+        <div class="mt-10 flex justify-center">
+            {{ $products->appends(collect(request()->query())->filter(fn ($v) => $v !== null && $v !== '')->all())->links() }}
+        </div>
+    @endif
     {{-- Inventory summary --}}
-    <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+    {{-- <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
         @php
             $totalStock = array_sum(array_column($products, 'stock'));
             $low = collect($products)->where('stock', '<=', 10)->where('stock', '>', 0)->count();
@@ -215,5 +227,5 @@
                 <p class="text-xs text-gray-500">Low stock alerts</p>
             </div>
         </div>
-    </div>
+    </div> --}}
 @endsection
