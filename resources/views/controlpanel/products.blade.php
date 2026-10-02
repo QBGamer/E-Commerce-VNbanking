@@ -76,7 +76,7 @@
             {{-- Product --}}
             <div class="sm:col-span-2">
                 <label class="mb-1.5 block text-sm font-medium text-gray-700">Product</label>
-                <input type="text" name="q" value="{{ request('q') }}" placeholder="Search by name..." class="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200" />
+                <input type="text" name="q" value="{{ request('q') }}" placeholder="Search by name or sku..." class="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200" />
             </div>
             {{-- Category --}}
             <div class="sm:col-span-2">

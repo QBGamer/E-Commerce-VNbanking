@@ -27,7 +27,7 @@ class CPProductController extends Controller
         if ($validCategory) $query->whereHas('category', fn ($c) => $c->where('slug', $validCategory));
         elseif ($category) $query->whereRaw('1 = 0');
 
-        if ($q !== '') $query->where('name', 'like', '%' . $q . '%');
+        if ($q !== '') $query->where('name', 'like', '%' . $q . '%')->orWhere('sku', 'like', '%' . $q . '%');;
 
         if ($stock === 'low') $query->where('stock', '<=', 10);
         elseif ($stock === 'out') $query->where('stock', '=', 0);
