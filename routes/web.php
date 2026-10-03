@@ -17,8 +17,13 @@ Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::view('/account', 'auth.account')->name('account');
 
-Route::get('/products', [ProductController::class, 'index'])->name('products.index');
-Route::get('/products/{slug}', [ProductController::class, 'show'])->name('products.detail');
+// Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+// Route::get('/products/{slug}', [ProductController::class, 'show'])->name('products.detail');
+Route::prefix('products')->name('products.')->group(function () {
+    Route::get('/', [ProductController::class, 'index'])->name('index');
+    Route::get('/{slug}', [ProductController::class, 'show'])->name('detail');
+    Route::delete('/{id}', [CPProductController::class, 'destroy'])->middleware(['auth', 'can:access-control-panel'])->name('destroy');
+});
 
 Route::prefix('cart')->name('cart.')->middleware('auth')->group(function () {
     Route::get('/', [CartItemsController::class, 'index'])->name('index');

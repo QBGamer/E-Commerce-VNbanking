@@ -4,7 +4,7 @@
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
             <h2 class="text-lg font-bold text-gray-900">Manage Products</h2>
-            <p class="text-sm text-gray-500">{{ count($products) }} products in catalog</p>
+            {{-- <p class="text-sm text-gray-500">{{ count($products) }} products in catalog</p> --}}
         </div>
         <x-button icon="plus" x-data x-on:click="document.getElementById('add-form').classList.toggle('hidden')">
             Add Product
@@ -63,7 +63,7 @@
                 <a href="{{ $queryUrl(['stock' => 'low']) }}" class="rounded-full px-4 py-2 text-sm font-medium {{ $chip($isLow) }}">Low Stock</a>
                 <a href="{{ $queryUrl(['status' => 'inactive']) }}" class="rounded-full px-4 py-2 text-sm font-medium {{ $chip($isOut) }}">Out of Stock</a>
             </div>
-            <p class="text-sm text-gray-500">
+            <p class="text-sm text-gray-500" id="product-count">
                 @if (count($products))
                     Showing <span class="font-semibold text-gray-800">{{ count($products) }}</span> of {{ $total }} products
                 @else
@@ -144,7 +144,7 @@
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     @forelse ($products as $product)
-                        <tr class="hover:bg-gray-50">
+                        <tr class="hover:bg-gray-50" id="product-{{ $product['id'] }}">
                             <td class="px-6 py-3.5">
                                 <div class="flex items-center gap-3">
                                     <img src="{{ $product['image'] }}" alt="{{ $product['name'] }}" class="h-10 w-10 rounded-lg border border-gray-100 object-cover" />
@@ -178,7 +178,7 @@
                                     <button type="button" class="rounded-lg p-2 text-gray-400 hover:bg-indigo-50 hover:text-indigo-600" title="Edit">
                                         <x-icons name="edit" class="w-4.5 h-4.5" />
                                     </button>
-                                    <button type="button" class="rounded-lg p-2 text-gray-400 hover:bg-red-50 hover:text-red-600" title="Delete">
+                                    <button @click='removeProduct({{ $product["id"] }})' type="button" class="rounded-lg p-2 text-gray-400 hover:bg-red-50 hover:text-red-600" title="Delete">
                                         <x-icons name="trash" class="w-4.5 h-4.5" />
                                     </button>
                                 </div>
@@ -200,6 +200,33 @@
             {{ $products->appends(collect(request()->query())->filter(fn ($v) => $v !== null && $v !== '')->all())->links() }}
         </div>
     @endif
+    <script>
+        function removeProduct(id) {
+            fetch("{{ route('products.destroy', ':id') }}".replace(':id', id), {
+                method: 'DELETE',
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json' }
+            })
+            .then(response => {
+                if (response.status === 200) {
+                    Alpine.store('toasts').notify('Product removed successfully.', 'success');
+                    document.getElementById('product-' + id).remove();
+                    document.getElementById('product-count').innerHTML = `Showing <span class="font-semibold text-gray-800">${document.querySelectorAll('tbody tr').length}</span> of {{ $total }} products`;
+                    // location.reload();
+                    return response.json();
+                }else {
+                    throw new Error('Failed to delete product.');
+                }
+            })
+            // .then(data => {
+            //     console.log('Success:', data);
+            // })
+            .catch(error => {
+                // console.error('Error:', error);
+                Alpine.store('toasts').notify('An error occurred while deleting the product.', 'error');
+                // alert('An error occurred while deleting the product.');
+            });
+            }
+    </script>
     {{-- Inventory summary --}}
     {{-- <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
         @php

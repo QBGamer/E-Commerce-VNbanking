@@ -56,4 +56,16 @@ class CPProductController extends Controller
             'total' => count(Product::all()),
         ]);
     }
+
+    public function destroy($id)
+    {
+        $product = Product::findOrFail($id);
+        if ($product->image && file_exists(public_path('images/products/' . $product->image))) {
+            unlink(public_path('images/products/' . $product->image));
+        }
+        $product->delete();
+        return response()->json([
+            'message' => $id . ': Product removed successfully.',
+        ]);
+    }
 }
