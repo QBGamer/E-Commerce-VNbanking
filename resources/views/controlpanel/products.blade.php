@@ -178,7 +178,7 @@
                                     <button type="button" class="rounded-lg p-2 text-gray-400 hover:bg-indigo-50 hover:text-indigo-600" title="Edit">
                                         <x-icons name="edit" class="w-4.5 h-4.5" />
                                     </button>
-                                    <button @click='removeProduct({{ $product["id"] }})' type="button" class="rounded-lg p-2 text-gray-400 hover:bg-red-50 hover:text-red-600" title="Delete">
+                                    <button @click='openModal("product-delete", { id: @json($product["id"]), name: @json($product["name"]) })' type="button" class="rounded-lg p-2 text-gray-400 hover:bg-red-50 hover:text-red-600" title="Delete">
                                         <x-icons name="trash" class="w-4.5 h-4.5" />
                                     </button>
                                 </div>
@@ -200,6 +200,17 @@
             {{ $products->appends(collect(request()->query())->filter(fn ($v) => $v !== null && $v !== '')->all())->links() }}
         </div>
     @endif
+    <x-modal id="product-delete" title="Delete product">
+        <p class="text-sm leading-relaxed text-gray-600">
+            Are you sure you want to delete
+            <span class="font-semibold text-gray-900" x-text="payload?.name ?? ''"></span>
+            from the catalog? This action cannot be undone.
+        </p>
+        <x-slot:footer>
+            <x-button variant="outline" x-on:click="close()">Cancel</x-button>
+            <x-button variant="danger" x-on:click="removeProduct(payload.id); close()">Delete</x-button>
+        </x-slot:footer>
+    </x-modal>
     <script>
         function removeProduct(id) {
             fetch("{{ route('products.destroy', ':id') }}".replace(':id', id), {

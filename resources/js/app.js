@@ -2,6 +2,8 @@ import './bootstrap';
 import Alpine from 'alpinejs';
 
 window.Alpine = Alpine;
+window.openModal  = (id, payload) => window.dispatchEvent(new CustomEvent('open-modal',  { detail: { id, payload } }));
+window.closeModal = () => window.dispatchEvent(new CustomEvent('close-modal'));
 document.addEventListener('alpine:init', () => {
     Alpine.store('toasts', {
         toasts: [],
