@@ -4,6 +4,8 @@ namespace App\Http\Controllers\ControlPanel;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use App\Models\Product;
 use App\Models\Category;
 
@@ -55,6 +57,68 @@ class CPProductController extends Controller
             'queryUrl' => $queryUrl,
             'total' => count(Product::all()),
         ]);
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'price' => 'required|numeric|min:0',
+            'stock' => 'nullable|integer|min:0',
+            'status' => 'nullable|in:active,draft',
+            'slug' => 'nullable|string|max:255',
+            'sku' => 'nullable|string|max:100',
+            'image' => 'nullable|string|max:255',
+            'badge' => 'nullable|string|max:50',
+            'category' => 'nullable|exists:categories,slug',
+        ]);
+
+        if (empty($data['slug'])) {
+            $data['slug'] = Str::slug($data['name']);
+        }
+
+        $category = !empty($data['category'])
+            ? Category::where('slug', $data['category'])->first()
+            : null;
+
+        $product = Product::create(Arr::except($data, ['category']));
+        $product->category_id = $category?->id;
+        $product->save();
+
+        return response()->json(['message' => 'Product created successfully.']);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $product = Product::findOrFail($id);
+
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'price' => 'required|numeric|min:0',
+            'stock' => 'nullable|integer|min:0',
+            'status' => 'nullable|in:active,draft',
+            'slug' => 'nullable|string|max:255',
+            'sku' => 'nullable|string|max:100',
+            'image' => 'nullable|string|max:255',
+            'badge' => 'nullable|string|max:50',
+            'category' => 'nullable|exists:categories,slug',
+        ]);
+
+        if (empty($data['slug'])) {
+            $data['slug'] = Str::slug($data['name']);
+        }
+
+        $category = !empty($data['category'])
+            ? Category::where('slug', $data['category'])->first()
+            : null;
+
+        $product->fill(Arr::except($data, ['category']));
+        $product->category_id = $category?->id;
+        $product->save();
+
+        return response()->json(['message' => 'Product updated successfully.']);
     }
 
     public function destroy($id)

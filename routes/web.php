@@ -22,6 +22,8 @@ Route::view('/account', 'auth.account')->name('account');
 Route::prefix('products')->name('products.')->group(function () {
     Route::get('/', [ProductController::class, 'index'])->name('index');
     Route::get('/{slug}', [ProductController::class, 'show'])->name('detail');
+    Route::post('/', [CPProductController::class, 'store'])->middleware(['auth', 'can:access-control-panel'])->name('store');
+    Route::put('/{id}', [CPProductController::class, 'update'])->middleware(['auth', 'can:access-control-panel'])->name('update');
     Route::delete('/{id}', [CPProductController::class, 'destroy'])->middleware(['auth', 'can:access-control-panel'])->name('destroy');
 });
 

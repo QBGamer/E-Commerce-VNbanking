@@ -6,43 +6,9 @@
             <h2 class="text-lg font-bold text-gray-900">Manage Products</h2>
             {{-- <p class="text-sm text-gray-500">{{ count($products) }} products in catalog</p> --}}
         </div>
-        <x-button icon="plus" x-data x-on:click="document.getElementById('add-form').classList.toggle('hidden')">
+        <x-button icon="plus" x-on:click="openModal('product-form')">
             Add Product
         </x-button>
-    </div>
-
-    {{-- Add / edit form --}}
-    <div id="add-form" x-cloak class="mt-6 hidden rounded-2xl border border-gray-200 bg-white p-6">
-        <h3 class="font-semibold text-gray-900">Add New Product</h3>
-        <form class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <x-form-input name="p_name" label="Product name" placeholder="e.g. Wireless Mouse" required />
-            <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700">Category</label>
-                <select name="p_category" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
-                    @foreach ($categories as $key => $label)
-                        <option value="{{ $key }}">{{ $label }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <x-form-input name="p_price" label="Price (USD)" type="number" step="0.01" placeholder="49.99" required />
-            <x-form-input name="p_stock" label="Stock quantity" type="number" placeholder="50" />
-            <x-form-input name="p_image" label="Image URL" placeholder="https://..." />
-            <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700">Status</label>
-                <select name="p_status" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
-                    <option>Active</option>
-                    <option>Draft</option>
-                </select>
-            </div>
-            <div class="sm:col-span-2 lg:col-span-3">
-                <label class="mb-1.5 block text-sm font-medium text-gray-700">Description</label>
-                <textarea name="p_desc" rows="3" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200" placeholder="Short product description..."></textarea>
-            </div>
-            <div class="flex gap-3 sm:col-span-2 lg:col-span-3">
-                <x-button type="submit" icon="check">Save Product</x-button>
-                <x-button variant="outline" x-on:click="document.getElementById('add-form').classList.add('hidden')">Cancel</x-button>
-            </div>
-        </form>
     </div>
 
     {{-- Filter bar --}}
@@ -172,10 +138,10 @@
                             </td>
                             <td class="px-6 py-3.5">
                                 <div class="flex items-center justify-end gap-1">
-                                    <a href="" class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700" title="View">
+                                    <button @click="openModal('product-view', @js($product))" type="button" class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700" title="View">
                                         <x-icons name="eye" class="w-4.5 h-4.5" />
-                                    </a>
-                                    <button type="button" class="rounded-lg p-2 text-gray-400 hover:bg-indigo-50 hover:text-indigo-600" title="Edit">
+                                    </button>
+                                    <button @click="openModal('product-form', @js($product->only(['id', 'name', 'slug', 'sku', 'description', 'price', 'stock', 'status', 'image', 'badge']) + ['category' => optional($product->category)->slug ?? '']))" type="button" class="rounded-lg p-2 text-gray-400 hover:bg-indigo-50 hover:text-indigo-600" title="Edit">
                                         <x-icons name="edit" class="w-4.5 h-4.5" />
                                     </button>
                                     <button @click='openModal("product-delete", { id: @json($product["id"]), name: @json($product["name"]) })' type="button" class="rounded-lg p-2 text-gray-400 hover:bg-red-50 hover:text-red-600" title="Delete">
@@ -211,6 +177,115 @@
             <x-button variant="danger" x-on:click="removeProduct(payload.id); close()">Delete</x-button>
         </x-slot:footer>
     </x-modal>
+    <x-modal id="product-view" title="Product details" max-width="max-w-xl">
+        <div class="space-y-4">
+            <template x-if="payload?.image">
+                <img :src="'/images/products/' + payload.image" :alt="payload?.name" class="h-44 w-full rounded-xl object-cover">
+            </template>
+            <template x-if="!payload?.image">
+                <div class="flex h-44 w-full items-center justify-center rounded-xl bg-gray-100 text-gray-400">
+                    <x-icons name="box" class="w-10 h-10" />
+                </div>
+            </template>
+            <div>
+                <h3 class="text-lg font-bold text-gray-900" x-text="payload?.name"></h3>
+                <p class="text-xs font-medium uppercase tracking-wide text-gray-500" x-text="'SKU: ' + (payload?.sku ?? '—')"></p>
+            </div>
+            <div class="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
+                <div class="rounded-xl bg-gray-50 px-3 py-2.5">
+                    <p class="text-xs text-gray-500">Category</p>
+                    <p class="font-semibold text-gray-900" x-text="payload?.category?.name ?? '—'"></p>
+                </div>
+                <div class="rounded-xl bg-gray-50 px-3 py-2.5">
+                    <p class="text-xs text-gray-500">Price</p>
+                    <p class="font-semibold text-gray-900" x-text="'$' + Number(payload?.price ?? 0).toFixed(2)"></p>
+                </div>
+                <div class="rounded-xl bg-gray-50 px-3 py-2.5">
+                    <p class="text-xs text-gray-500">Stock</p>
+                    <p class="font-semibold text-gray-900" x-text="payload?.stock ?? 0"></p>
+                </div>
+                <div class="rounded-xl bg-gray-50 px-3 py-2.5">
+                    <p class="text-xs text-gray-500">Status</p>
+                    <span class="inline-block rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700" x-show="payload?.status === 'active'" x-text="(payload?.status ?? '').toUpperCase()"></span>
+                    <span class="inline-block rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-semibold text-gray-600" x-show="payload?.status !== 'active'" x-text="(payload?.status ?? '').toUpperCase()"></span>
+                </div>
+            </div>
+            <template x-if="payload?.description">
+                <p class="text-sm text-gray-600" x-text="payload.description"></p>
+            </template>
+        </div>
+        <x-slot:footer>
+            <x-button x-on:click="close()">Close</x-button>
+        </x-slot:footer>
+    </x-modal>
+    <x-form-modal
+        id="product-form"
+        title="Product"
+        title-create="Add new product"
+        title-update="Edit product"
+        :defaults="[
+            'id' => null,
+            'name' => '',
+            'slug' => '',
+            'sku' => '',
+            'category' => '',
+            'price' => '',
+            'stock' => '',
+            'image' => '',
+            'badge' => '',
+            'status' => 'active',
+            'description' => '',
+        ]"
+    >
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div class="sm:col-span-2">
+                <label class="mb-1.5 block text-sm font-medium text-gray-700">Product name</label>
+                <input type="text" x-model="form.name" placeholder="e.g. Wireless Mouse"
+                    class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+            </div>
+            <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700">SKU</label>
+                <input type="text" x-model="form.sku" placeholder="e.g. MOU-WL-001"
+                    class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+            </div>
+            <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700">Category</label>
+                <select x-model="form.category" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+                    <option value="">-- Select --</option>
+                    @foreach ($categories as $key => $label)
+                        <option value="{{ $key }}">{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700">Price (USD)</label>
+                <input type="number" step="0.01" min="0" x-model="form.price" placeholder="49.99"
+                    class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+            </div>
+            <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700">Stock quantity</label>
+                <input type="number" min="0" x-model="form.stock" placeholder="50"
+                    class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+            </div>
+            <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700">Image URL</label>
+                <input type="text" x-model="form.image" placeholder="https://..."
+                    class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+            </div>
+            <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700">Status</label>
+                <select x-model="form.status" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+                    <option value="active">Active</option>
+                    <option value="draft">Draft</option>
+                </select>
+            </div>
+            <div class="sm:col-span-2">
+                <label class="mb-1.5 block text-sm font-medium text-gray-700">Description</label>
+                <textarea rows="3" x-model="form.description" placeholder="Short product description..."
+                    class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"></textarea>
+            </div>
+        </div>
+    </x-form-modal>
     <script>
         function removeProduct(id) {
             fetch("{{ route('products.destroy', ':id') }}".replace(':id', id), {
@@ -235,8 +310,31 @@
                 // console.error('Error:', error);
                 Alpine.store('toasts').notify('An error occurred while deleting the product.', 'error');
                 // alert('An error occurred while deleting the product.');
+});
+    }
+    async function savePayload(id, form) {
+        const url = id
+            ? "{{ route('products.update', ':id') }}".replace(':id', id)
+            : "{{ route('products.store') }}";
+        try {
+            const response = await fetch(url, {
+                method: id ? 'PUT' : 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ ...form, category: form.category || null })
             });
-            }
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Failed to save product.');
+            closeModal();
+            Alpine.store('toasts').notify(data.message, 'success');
+            setTimeout(() => location.reload(), 500);
+        } catch (error) {
+            Alpine.store('toasts').notify(error.message, 'error');
+        }
+    }
     </script>
     {{-- Inventory summary --}}
     {{-- <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
