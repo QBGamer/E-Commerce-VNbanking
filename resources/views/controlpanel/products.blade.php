@@ -95,7 +95,9 @@
     @endif
 
     {{-- Table --}}
-    <div class="mt-4 overflow-hidden rounded-2xl border border-gray-200 bg-white">
+    <div class="mt-4 overflow-hidden rounded-2xl border border-gray-200 bg-white" id="products-table"
+         x-data="productsTable"
+    >
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm">
                 <thead class="bg-gray-50 text-xs uppercase tracking-wide text-gray-400">
@@ -108,55 +110,58 @@
                         <th class="px-6 py-3 text-right font-medium">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100">
-                    @forelse ($products as $product)
-                        <tr class="hover:bg-gray-50" id="product-{{ $product['id'] }}">
+                <tbody id="product-rows" class="divide-y divide-gray-100">
+                    <template x-for="product in rows" :key="product.id">
+                        <tr class="hover:bg-gray-50" :id="'product-' + product.id">
                             <td class="px-6 py-3.5">
                                 <div class="flex items-center gap-3">
-                                    <img src="{{ $product['image'] }}" alt="{{ $product['name'] }}" class="h-10 w-10 rounded-lg border border-gray-100 object-cover" />
+                                    <img :src="product.image" :alt="product.name" class="h-10 w-10 rounded-lg border border-gray-100 object-cover" />
                                     <div>
-                                        <span class="block font-medium text-gray-800">{{ $product['name'] }}</span>
-                                        <span class="block font-xs text-gray-500">{{ $product['sku'] }}</span>
+                                        <span class="block font-medium text-gray-800" x-text="product.name"></span>
+                                        <span class="block text-xs text-gray-500" x-text="product.sku"></span>
                                     </div>
                                 </div>
                             </td>
                             <td class="px-6 py-3.5">
-                                <span class="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-600">{{ $product['category']['name'] }}</span>
+                                <span class="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-600" x-text="product.category?.name ?? '—'"></span>
                             </td>
-                            <td class="px-6 py-3.5 font-medium text-gray-900">${{ number_format($product['price'], 2) }}</td>
+                            <td class="px-6 py-3.5 font-medium text-gray-900" x-text="'$' + Number(product.price).toFixed(2)"></td>
                             <td class="px-6 py-3.5">
-                                <span class="font-medium {{ $product['stock'] === 0 ? 'text-red-600' : ($product['stock'] <= 10 ? 'text-amber-600' : 'text-gray-700') }}">
-                                    {{ $product['stock'] === 0 ? 'Out of stock' : $product['stock'] }}
-                                </span>
+                                <span class="font-medium" :class="{
+                                    'text-red-600': product.stock === 0,
+                                    'text-amber-600': product.stock > 0 && product.stock <= 10,
+                                    'text-gray-700': product.stock > 10
+                                }" x-text="product.stock === 0 ? 'Out of stock' : product.stock"></span>
                             </td>
                             <td class="px-6 py-3.5">
-                                @if ($product['status'] !== 'active')
-                                    <span class="rounded-full bg-red-100 px-2.5 py-1 text-xs font-semibold text-red-700">Inactive</span>
-                                @else
-                                    <span class="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700">Active</span>
-                                @endif
+                                <span class="rounded-full px-2.5 py-1 text-xs font-semibold"
+                                    :class="product.status === 'active'
+                                        ? 'bg-emerald-100 text-emerald-700'
+                                        : 'bg-red-100 text-red-700'"
+                                    x-text="product.status === 'active' ? 'Active' : 'Inactive'"></span>
                             </td>
                             <td class="px-6 py-3.5">
                                 <div class="flex items-center justify-end gap-1">
-                                    <button @click="openModal('product-view', @js($product))" type="button" class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700" title="View">
+                                    <button @click="openModal('product-view', product)" type="button" class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700" title="View">
                                         <x-icons name="eye" class="w-4.5 h-4.5" />
                                     </button>
-                                    <button @click="openModal('product-form', @js($product->only(['id', 'name', 'slug', 'sku', 'description', 'price', 'stock', 'status', 'image', 'badge']) + ['category' => optional($product->category)->slug ?? '']))" type="button" class="rounded-lg p-2 text-gray-400 hover:bg-indigo-50 hover:text-indigo-600" title="Edit">
+                                    <button @click="openModal('product-form', { ...product, category: product.category?.slug ?? '' })" type="button" class="rounded-lg p-2 text-gray-400 hover:bg-indigo-50 hover:text-indigo-600" title="Edit">
                                         <x-icons name="edit" class="w-4.5 h-4.5" />
                                     </button>
-                                    <button @click='openModal("product-delete", { id: @json($product["id"]), name: @json($product["name"]) })' type="button" class="rounded-lg p-2 text-gray-400 hover:bg-red-50 hover:text-red-600" title="Delete">
+                                    <button @click="openModal('product-delete', { id: product.id, name: product.name })" type="button" class="rounded-lg p-2 text-gray-400 hover:bg-red-50 hover:text-red-600" title="Delete">
                                         <x-icons name="trash" class="w-4.5 h-4.5" />
                                     </button>
                                 </div>
                             </td>
                         </tr>
-                    @empty
+                    </template>
+                    <template x-if="rows.length === 0">
                         <tr>
                             <td colspan="6" class="px-6 py-12 text-center text-sm text-gray-500">
                                 No products match your filters. Try adjusting or resetting them.
                             </td>
                         </tr>
-                    @endforelse
+                    </template>
                 </tbody>
             </table>
         </div>
@@ -218,11 +223,12 @@
             <x-button x-on:click="close()">Close</x-button>
         </x-slot:footer>
     </x-modal>
-    <x-form-modal
+    <x-modal
         id="product-form"
         title="Product"
         title-create="Add new product"
         title-update="Edit product"
+        max-width="max-w-2xl"
         :defaults="[
             'id' => null,
             'name' => '',
@@ -251,7 +257,7 @@
             <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700">Category</label>
                 <select x-model="form.category" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
-                    <option value="">-- Select --</option>
+                    <option value="" disabled>-- Select --</option>
                     @foreach ($categories as $key => $label)
                         <option value="{{ $key }}">{{ $label }}</option>
                     @endforeach
@@ -276,7 +282,7 @@
                 <label class="mb-1.5 block text-sm font-medium text-gray-700">Status</label>
                 <select x-model="form.status" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
                     <option value="active">Active</option>
-                    <option value="draft">Draft</option>
+                    <option value="inactive">InActive</option>
                 </select>
             </div>
             <div class="sm:col-span-2">
@@ -285,56 +291,81 @@
                     class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"></textarea>
             </div>
         </div>
-    </x-form-modal>
+    </x-modal>
     <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('productsTable', () => ({
+                rows: @js($rows),
+                total: @js($total),
+
+                upsert(product) {
+                    const index = this.rows.findIndex(row => row.id === product.id);
+                    if (index === -1) this.rows.unshift(product);
+                    else this.rows.splice(index, 1, product);
+                },
+
+                remove(id) {
+                    this.rows = this.rows.filter(row => row.id !== id);
+                    if (this.rows.length < this.total) this.total--;
+                },
+
+                refreshCount() {
+                    const el = document.getElementById('product-count');
+                    if (!el) return;
+                    el.innerHTML = this.rows.length
+                        ? `Showing <span class="font-semibold text-gray-800">${this.rows.length}</span> of ${this.total} products`
+                        : 'No results';
+                },
+            }));
+        });
+
+        function productsTable() {
+            return Alpine.$data(document.getElementById('products-table'));
+        }
+
         function removeProduct(id) {
             fetch("{{ route('products.destroy', ':id') }}".replace(':id', id), {
                 method: 'DELETE',
-                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json' }
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
             })
             .then(response => {
-                if (response.status === 200) {
-                    Alpine.store('toasts').notify('Product removed successfully.', 'success');
-                    document.getElementById('product-' + id).remove();
-                    document.getElementById('product-count').innerHTML = `Showing <span class="font-semibold text-gray-800">${document.querySelectorAll('tbody tr').length}</span> of {{ $total }} products`;
-                    // location.reload();
-                    return response.json();
-                }else {
-                    throw new Error('Failed to delete product.');
-                }
+                if (response.status !== 200) throw new Error('Failed to delete product.');
+                const table = productsTable();
+                table.remove(id);
+                table.refreshCount();
+                Alpine.store('toasts').notify('Product removed successfully.', 'success');
             })
-            // .then(data => {
-            //     console.log('Success:', data);
-            // })
             .catch(error => {
-                // console.error('Error:', error);
-                Alpine.store('toasts').notify('An error occurred while deleting the product.', 'error');
-                // alert('An error occurred while deleting the product.');
-});
-    }
-    async function savePayload(id, form) {
-        const url = id
-            ? "{{ route('products.update', ':id') }}".replace(':id', id)
-            : "{{ route('products.store') }}";
-        try {
-            const response = await fetch(url, {
-                method: id ? 'PUT' : 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ ...form, category: form.category || null })
+                Alpine.store('toasts').notify(error.message, 'error');
             });
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.message || 'Failed to save product.');
-            closeModal();
-            Alpine.store('toasts').notify(data.message, 'success');
-            setTimeout(() => location.reload(), 500);
-        } catch (error) {
-            Alpine.store('toasts').notify(error.message, 'error');
         }
-    }
+
+        async function savePayload(id, form) {
+            const url = id
+                ? "{{ route('products.update', ':id') }}".replace(':id', id)
+                : "{{ route('products.store') }}";
+            try {
+                const response = await fetch(url, {
+                    method: id ? 'PUT' : 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(form)
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || 'Failed to save product.');
+                closeModal();
+                const table = productsTable();
+                if (!id) table.total++;
+                table.upsert(data.product);
+                table.refreshCount();
+                Alpine.store('toasts').notify(data.message, 'success');
+            } catch (error) {
+                Alpine.store('toasts').notify(error.message, 'error');
+            }
+        }
     </script>
     {{-- Inventory summary --}}
     {{-- <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">

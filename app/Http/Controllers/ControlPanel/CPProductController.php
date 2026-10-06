@@ -11,6 +11,29 @@ use App\Models\Category;
 
 class CPProductController extends Controller
 {
+    public static function presentProduct(Product $product)
+    {
+        $product->loadMissing('category');
+
+        return [
+            'id'          => $product->id,
+            'name'        => $product->name,
+            'slug'        => $product->slug,
+            'sku'         => $product->sku,
+            'description' => $product->description,
+            'price'       => (float) $product->price,
+            'stock'       => (int) $product->stock,
+            'status'      => $product->status,
+            'image'       => $product->image,
+            'badge'       => $product->badge,
+            'category'    => [
+                'id'   => $product->category?->id,
+                'name' => $product->category?->name,
+                'slug' => $product->category?->slug,
+            ],
+        ];
+    }
+
     //CURD
     public function index(Request $request)
     {
@@ -39,6 +62,9 @@ class CPProductController extends Controller
         if ($request->filled('price_max'))  $query->where('price', '<=', (float) $request->query('price_max'));
 
         $products = $query->paginate(20);
+        $rows = $products->getCollection()
+            ->map(fn (Product $product) => static::presentProduct($product))
+            ->values();
 
         $filters = $request->only(['q', 'category', 'price_min', 'price_max', 'stock', 'status']);
         $queryUrl = function (array $overrides = []) use ($filters) {
@@ -47,6 +73,7 @@ class CPProductController extends Controller
         };
         return view('controlpanel.products', [
             'products'   => $products,
+            'rows'       => $rows,
             'categories' => $categories,
             'category'   => $category,
             'query'      => $q,
@@ -66,27 +93,30 @@ class CPProductController extends Controller
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'stock' => 'nullable|integer|min:0',
-            'status' => 'nullable|in:active,draft',
+            'status' => 'nullable|in:active,inactive',
             'slug' => 'nullable|string|max:255',
             'sku' => 'nullable|string|max:100',
             'image' => 'nullable|string|max:255',
             'badge' => 'nullable|string|max:50',
-            'category' => 'nullable|exists:categories,slug',
+            'category' => 'required|exists:categories,slug',
         ]);
 
         if (empty($data['slug'])) {
             $data['slug'] = Str::slug($data['name']);
         }
 
-        $category = !empty($data['category'])
-            ? Category::where('slug', $data['category'])->first()
-            : null;
+        $category = Category::where('slug', $data['category'])->first();
 
-        $product = Product::create(Arr::except($data, ['category']));
-        $product->category_id = $category?->id;
+        $product = new Product();
+        $product->fill(Arr::except($data, ['category']));
+        $product->category_id = $category->id;
+        $product->description = $data['description'] ?? '';
         $product->save();
 
-        return response()->json(['message' => 'Product created successfully.']);
+        return response()->json([
+            'message' => 'Product created successfully.',
+            'product' => $this->presentProduct($product),
+        ]);
     }
 
     public function update(Request $request, $id)
@@ -98,27 +128,29 @@ class CPProductController extends Controller
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'stock' => 'nullable|integer|min:0',
-            'status' => 'nullable|in:active,draft',
+            'status' => 'nullable|in:active,inactive',
             'slug' => 'nullable|string|max:255',
             'sku' => 'nullable|string|max:100',
             'image' => 'nullable|string|max:255',
             'badge' => 'nullable|string|max:50',
-            'category' => 'nullable|exists:categories,slug',
+            'category' => 'required|exists:categories,slug',
         ]);
 
         if (empty($data['slug'])) {
             $data['slug'] = Str::slug($data['name']);
         }
 
-        $category = !empty($data['category'])
-            ? Category::where('slug', $data['category'])->first()
-            : null;
+        $category = Category::where('slug', $data['category'])->first();
 
         $product->fill(Arr::except($data, ['category']));
-        $product->category_id = $category?->id;
+        $product->category_id = $category->id;
+        $product->description = $data['description'] ?? '';
         $product->save();
 
-        return response()->json(['message' => 'Product updated successfully.']);
+        return response()->json([
+            'message' => 'Product updated successfully.',
+            'product' => $this->presentProduct($product),
+        ]);
     }
 
     public function destroy($id)

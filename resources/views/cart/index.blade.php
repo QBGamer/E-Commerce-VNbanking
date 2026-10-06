@@ -36,7 +36,8 @@
                                                 </a>
                                                 <p class="mt-1 text-sm text-gray-500">Unit: <span class="font-semibold text-gray-800">${{ number_format($item['product']['price'], 2) }}</span></p>
                                             </div>
-                                            <button id="remove-item" data-item-id="{{ $item['id'] }}" type="button" class="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600" aria-label="Remove item">
+                                            <button type="button" class="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600" aria-label="Delete item"
+                                                @click="openModal('cart-delete', { id: @js($item['id']), name: @js($item['product']['name']) })">
                                                 <x-icons name="trash" class="w-5 h-5" />
                                             </button>
                                         </div>
@@ -126,71 +127,73 @@
             </div>
         @endif
     </div>
+    <x-modal id="cart-delete" title="delete item">
+        <p class="text-sm leading-relaxed text-gray-600">
+            Are you sure you want to delete
+            <span class="font-semibold text-gray-900" x-text="payload?.name ?? ''"></span>
+            from your cart?
+        </p>
+        <x-slot:footer>
+            <x-button variant="outline" x-on:click="close()">Cancel</x-button>
+            <x-button variant="danger" x-on:click="deleteCartItem(payload.id); close()">Delete</x-button>
+        </x-slot:footer>
+    </x-modal>
     <script>
-        document.querySelectorAll('#remove-item').forEach(button => {
-            button.addEventListener('click', function() {
-                const itemId = this.getAttribute('data-item-id');
-                fetch(`/cart/${itemId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json'
-                    }
-                })
-                .then(response => {
-                    if (response.status === 200) {
-                        document.getElementById(`item-${itemId}`).remove();
-                        Alpine.store('toasts').notify('Item removed from cart.', 'success');
-                        return response.json();
-                    } else if (response.status === 401) {
-                        // window.location.href = '/login'; // Redirect to login page
-                        throw new Error('Unauthorized. Please log in to add products to your cart.');
-                    } else {
-                        console.error('Failed to remove item from cart.');
-                    }
-                })
-                .then(data => {
-                    if (data.subtotal !== undefined && data.total !== undefined && data.count !== undefined) {
-                        document.getElementById('subtotal').textContent = '$' + data.subtotal;
-                        document.getElementById('total').textContent = '$' + data.total;
-                        document.getElementById('subtotal-label').textContent = 'Subtotal (' + data.count + ' items)';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
+        function refreshCartSummary(data) {
+            if (data.subtotal !== undefined && data.total !== undefined && data.count !== undefined) {
+                document.getElementById('subtotal').textContent = '$' + data.subtotal;
+                document.getElementById('total').textContent = '$' + data.total;
+                document.getElementById('subtotal-label').textContent = 'Subtotal (' + data.count + ' items)';
+            }
+        }
+
+        function deleteCartItem(itemId) {
+            fetch("{{ route('cart.destroy', ':id') }}".replace(':id', itemId), {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.status === 200) {
+                    document.getElementById(`item-${itemId}`).remove();
+                    Alpine.store('toasts').notify('Item removed from cart.', 'success');
+                    return response.json();
+                } else if (response.status === 401) {
+                    throw new Error('Unauthorized. Please log in to delete cart items.');
+                } else {
+                    throw new Error('Failed to delete item from cart.');
+                }
+            })
+            .then(data => refreshCartSummary(data))
+            .catch(error => {
+                Alpine.store('toasts').notify(error.message, 'error');
             });
-        });
+        }
 
         function updateCartItem(itemId, quantity) {
-            fetch(`/cart/${itemId}`, {
+            fetch("{{ route('cart.update', ':id') }}".replace(':id', itemId), {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
                 },
                 body: JSON.stringify({ quantity: quantity })
             })
             .then(response => {
                 if (response.status === 200) {
-                    // console.log('Cart item updated successfully.');
                     return response.json();
                 } else if (response.status === 401) {
-                    // window.location.href = '/login'; // Redirect to login page
                     throw new Error('Unauthorized. Please log in to update your cart.');
                 } else {
                     throw new Error('Failed to update cart item.');
                 }
             })
-            .then(data => {
-                if (data.subtotal !== undefined && data.total !== undefined && data.count !== undefined) {
-                    document.getElementById('subtotal').textContent = '$' + data.subtotal;
-                    document.getElementById('total').textContent = '$' + data.total;
-                    document.getElementById('subtotal-label').textContent = 'Subtotal (' + data.count + ' items)';
-                }
-            })
+            .then(data => refreshCartSummary(data))
             .catch(error => {
-                console.error('Error:', error);
+                Alpine.store('toasts').notify(error.message, 'error');
             });
         }
     </script>
