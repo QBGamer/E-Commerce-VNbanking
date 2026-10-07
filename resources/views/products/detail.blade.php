@@ -17,13 +17,29 @@
 
         <div class="mt-6 grid grid-cols-1 gap-10 lg:grid-cols-2" x-data="{ qty: 1 }">
             {{-- Image --}}
-            <div class="relative overflow-hidden rounded-2xl border border-gray-200 bg-white">
-                <img src="{{ $product['image'] }}" alt="{{ $product['name'] }}" class="aspect-square w-full object-cover" />
+            <div x-data="{ current: 0, images: @js($productImages) }"
+                x-init="setInterval(() => { current = (current + 1) % images.length }, 5000)"
+                class="relative">
+
+                <!-- Main -->
+                <img :src="images[current].url" alt="{{ $product['name'] }}"
+                    class="aspect-square w-full object-cover rounded-2xl border border-gray-200" />
+
+                <!-- Badge -->
                 @if (!empty($product['badge']))
                     <span class="absolute left-4 top-4 rounded-full bg-red-600 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
                         {{ $product['badge'] }}
                     </span>
                 @endif
+
+                <!-- Thumbnails -->
+                <div class="flex gap-2 mt-3">
+                    <template x-for="(img, index) in images" :key="img.id">
+                        <img :src="img.url" @click="current = index"
+                            class="h-16 w-16 object-cover rounded-lg border cursor-pointer"
+                            :class="{'ring-2 ring-indigo-500': current === index}" />
+                    </template>
+                </div>
             </div>
 
             {{-- Info --}}

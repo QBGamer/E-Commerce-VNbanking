@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\ProductImage;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
@@ -76,10 +79,33 @@ class ProductController extends Controller
             $relatedProducts = $relatedProducts->merge($additionalProducts);
         }
 
+        $productImages = collect();
+        $productImages->push([
+            'id' => 0,
+            'url' => Str::startsWith($product->image, ['http://', 'https://'])
+                ? $product->image
+                : Storage::url($product->image),
+        ]);
+
+        $productImages = $productImages->merge(
+            ProductImage::where('product_id', $product->id)
+                ->orderBy('position')
+                ->get()
+                ->map(function ($img) {
+                    return [
+                        'id' => $img->id,
+                        'url' => Str::startsWith($img->image, ['http://', 'https://'])
+                            ? $img->image
+                            : Storage::url($img->image),
+                    ];
+                })
+        );
+
         return view('products.detail', [
             'product'    => $product,
             'categories' => $categories,
             'relatedProducts' => $relatedProducts,
+            'productImages' => $productImages,
         ]);
     }
 }
