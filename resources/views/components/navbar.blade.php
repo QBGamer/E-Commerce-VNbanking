@@ -97,7 +97,7 @@
                             </a>
                             @if(Auth::user()->role=="admin" || Auth::user()->role=="manager" || Auth::user()->role=="staff")
                             <div class="my-1 border-t border-gray-100"></div>
-                            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-500 hover:bg-gray-50">
+                            <a href="{{ route('controlpanel.dashboard') }}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-500 hover:bg-gray-50">
                                 <x-icons name="dashboard" class="w-4 h-4 text-gray-400" /> Control Panel
                             </a>
                             @endif

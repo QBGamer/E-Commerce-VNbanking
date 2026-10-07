@@ -1,4 +1,4 @@
-@extends('admin.layouts.app', ['title' => 'Orders'])
+@extends('controlpanel.layouts.app', ['title' => 'Orders'])
 
 @section('content')
 @php

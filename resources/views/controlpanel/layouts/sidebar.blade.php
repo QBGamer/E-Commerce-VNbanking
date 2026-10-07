@@ -14,12 +14,12 @@
     <nav class="flex-1 space-y-1 overflow-y-auto p-3">
         @php
             $menu = [
-                ['route' => 'admin.dashboard', 'label' => 'Dashboard', 'icon' => 'dashboard'],
-                ['route' => 'admin.products', 'label' => 'Products', 'icon' => 'box'],
-                ['route' => 'admin.orders', 'label' => 'Orders', 'icon' => 'receipt'],
-                ['route' => 'admin.customers', 'label' => 'Customers', 'icon' => 'users'],
-                ['route' => 'admin.coupons', 'label' => 'Coupons', 'icon' => 'tag'],
-                ['route' => 'admin.settings', 'label' => 'Settings', 'icon' => 'settings'],
+                ['route' => 'controlpanel.dashboard', 'label' => 'Dashboard', 'icon' => 'dashboard'],
+                ['route' => 'controlpanel.products', 'label' => 'Products', 'icon' => 'box'],
+                ['route' => 'controlpanel.orders', 'label' => 'Orders', 'icon' => 'receipt'],
+                ['route' => 'controlpanel.customers', 'label' => 'Customers', 'icon' => 'users'],
+                ['route' => 'controlpanel.coupons', 'label' => 'Coupons', 'icon' => 'tag'],
+                ['route' => 'controlpanel.settings', 'label' => 'Settings', 'icon' => 'settings'],
             ];
         @endphp
         @foreach ($menu as $item)
@@ -28,7 +28,7 @@
                 class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors {{ $active ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}">
                 <x-icons :name="$item['icon']" class="w-5 h-5 {{ $active ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}" />
                 {{ $item['label'] }}
-                @if ($item['route'] === 'admin.orders')
+                @if ($item['route'] === 'controlpanel.orders')
                     <span class="ml-auto rounded-full px-2 py-0.5 text-[11px] font-semibold {{ $active ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-700' }}">{{ count($adminOrders) }}</span>
                 @endif
             </a>
@@ -43,8 +43,8 @@
         <div class="mt-2 flex items-center gap-3 rounded-xl bg-gray-50 px-3 py-2.5">
             <span class="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-600 text-sm font-bold text-white">AD</span>
             <div class="min-w-0 leading-tight">
-                <p class="truncate text-sm font-semibold text-gray-900">Admin Demo</p>
-                <p class="truncate text-xs text-gray-400">admin@shophub.demo</p>
+                <p class="truncate text-sm font-semibold text-gray-900">{{ Auth::user()->name }}</p>
+                <p class="truncate text-xs text-gray-400">{{ Auth::user()->email }}</p>
             </div>
         </div>
     </div>

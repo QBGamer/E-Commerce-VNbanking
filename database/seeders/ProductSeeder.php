@@ -64,6 +64,19 @@ class ProductSeeder extends Seeder
                 'image' => 'https://placehold.co/600x600?text=Keyboard',
                 'badge' => null,
             ],
+            [
+                'category_id' => 2,
+                'name' => 'delete me',
+                'slug' => 'delete-me',
+                'sku' => 'SKU-delete',
+                'description' => 'This product is meant to be deleted and should not appear in the product list.',
+                'price' => 899999,
+                'old_price' => 99,
+                'stock' => 99999999,
+                'status' => 'active',
+                'image' => 'https://placehold.co/600x600?text=Error',
+                'badge' => null,
+            ],
         ];
 
         foreach ($products as $product) {

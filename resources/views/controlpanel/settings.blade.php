@@ -1,4 +1,4 @@
-@extends('admin.layouts.app', ['title' => 'Settings'])
+@extends('controlpanel.layouts.app', ['title' => 'Settings'])
 
 @section('content')
     <div x-data="settingsPanel()">
