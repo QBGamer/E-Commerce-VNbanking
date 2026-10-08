@@ -33,10 +33,10 @@
                 @endif
 
                 <!-- Thumbnails -->
-                <div class="flex gap-2 mt-3">
+                <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 bg-black/20 p-1 rounded-lg">
                     <template x-for="(img, index) in images" :key="img.id">
                         <img :src="img.url" @click="current = index"
-                            class="h-16 w-16 object-cover rounded-lg border cursor-pointer"
+                            class="h-16 w-16 object-cover rounded-lg cursor-pointer"
                             :class="{'ring-2 ring-indigo-500': current === index}" />
                     </template>
                 </div>
