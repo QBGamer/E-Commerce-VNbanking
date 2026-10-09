@@ -22,7 +22,6 @@ class ProductSeeder extends Seeder
                 'old_price' => 39.99,
                 'stock' => 120,
                 'status' => 'active',
-                'image' => 'https://placehold.co/600x600?text=Mouse',
                 'badge' => 'Sale',
             ],
             [
@@ -35,7 +34,6 @@ class ProductSeeder extends Seeder
                 'old_price' => null,
                 'stock' => 35,
                 'status' => 'active',
-                'image' => 'https://placehold.co/600x600?text=Jacket',
                 'badge' => 'Trending',
             ],
             [
@@ -48,7 +46,6 @@ class ProductSeeder extends Seeder
                 'old_price' => 34.99,
                 'stock' => 8,
                 'status' => 'active',
-                'image' => 'https://placehold.co/600x600?text=Mug',
                 'badge' => 'Low Stock',
             ],
             [
@@ -61,7 +58,6 @@ class ProductSeeder extends Seeder
                 'old_price' => null,
                 'stock' => 0,
                 'status' => 'active',
-                'image' => 'https://placehold.co/600x600?text=Keyboard',
                 'badge' => null,
             ],
             [
@@ -74,7 +70,6 @@ class ProductSeeder extends Seeder
                 'old_price' => 99,
                 'stock' => 99999999,
                 'status' => 'active',
-                'image' => 'https://placehold.co/600x600?text=Error',
                 'badge' => null,
             ],
         ];

@@ -19,7 +19,6 @@ return new class extends Migration
             $table->decimal('old_price', 10, 2)->nullable();
             $table->unsignedInteger('stock')->default(0);
             $table->enum('status', ['active', 'inactive'])->default('active');
-            $table->string('image')->nullable();
             $table->string('badge', 50)->nullable();
             $table->timestamps();
             $table->softDeletes();
