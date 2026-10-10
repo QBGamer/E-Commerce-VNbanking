@@ -17,34 +17,75 @@
 
         <div class="mt-6 grid grid-cols-1 gap-10 lg:grid-cols-2" x-data="{ qty: 1 }">
             {{-- Image --}}
-            <div x-data="{ current: 0, images: @js($productImages) }"
-                x-init="setInterval(() => { current = (current + 1) % images.length }, 5000)"
+            <div x-data="{
+                    current: 0,
+                    images: @js($productImages),
+                    canPrev: false,
+                    canNext: false,
+                    refresh() {
+                        const el = this.$refs.strip;
+                        if (!el) return;
+                        this.canPrev = el.scrollLeft > 1;
+                        this.canNext = el.scrollLeft + el.clientWidth < el.scrollWidth - 1;
+                    },
+                    step(dir) {
+                        const el = this.$refs.strip;
+                        if (!el) return;
+                        el.scrollBy({ left: dir * el.clientWidth * 0.8, behavior: 'smooth' });
+                    }
+                }"
+                x-init="$nextTick(() => refresh());
+                        if (images.length > 1) setInterval(() => { current = (current + 1) % images.length }, 5000)"
                 class="relative">
 
                 <!-- Main -->
-                <img :src="images[current].url" alt="{{ $product['name'] }}"
-                    class="aspect-square w-full object-cover rounded-2xl border border-gray-200" />
+                <div class="relative">
+                    <template x-if="images.length">
+                        <img :src="images[current].url" alt="{{ $product['name'] }}"
+                            class="aspect-square w-full object-cover rounded-2xl border border-gray-200" />
+                    </template>
+                    <template x-if="!images.length">
+                        <div class="flex aspect-square w-full items-center justify-center rounded-2xl border border-gray-200 bg-gray-50">
+                            <img src="https://placehold.co/600x600?text=No+Image" alt="{{ $product['name'] }}" class="h-full w-full object-cover rounded-2xl" />
+                        </div>
+                    </template>
 
-                <!-- Badge -->
-                @if (!empty($product['badge']))
-                    <span class="absolute left-4 top-4 rounded-full bg-red-600 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
-                        {{ $product['badge'] }}
-                    </span>
-                @endif
+                    <!-- Badge -->
+                    @if (!empty($product['badge']))
+                        <span class="absolute left-4 top-4 rounded-full bg-red-600 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
+                            {{ $product['badge'] }}
+                        </span>
+                    @endif
+                </div>
 
                 <!-- Thumbnails -->
-                <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 bg-black/20 p-1 rounded-lg">
-                    <template x-for="(img, index) in images" :key="img.id">
-                        <img :src="img.url" @click="current = index"
-                            class="h-16 w-16 object-cover rounded-lg cursor-pointer"
-                            :class="{'ring-2 ring-indigo-500': current === index}" />
-                    </template>
+                <div class="mt-1 flex items-center gap-2 bg-gray-200/50 rounded-2xl p-1" x-show="images.length > 1">
+                    <button type="button" @click="step(-1)" :disabled="!canPrev"
+                        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition-colors hover:border-indigo-300 hover:text-indigo-600 disabled:pointer-events-none disabled:opacity-30"
+                        aria-label="Previous images">
+                        <x-icons name="chevron-left" class="h-4 w-4" />
+                    </button>
+
+                    <div x-ref="strip" @scroll="refresh()"
+                        class="no-scrollbar flex min-w-0 flex-1 gap-2 overflow-x-auto">
+                        <template x-for="(img, index) in images" :key="img.id">
+                            <img :src="img.url" @click="current = index"
+                                class="h-16 w-16 shrink-0 object-cover rounded-lg cursor-pointer border-2"
+                                :class="current === index ? 'border-indigo-500' : 'border-transparent hover:border-gray-300'" />
+                        </template>
+                    </div>
+
+                    <button type="button" @click="step(1)" :disabled="!canNext"
+                        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition-colors hover:border-indigo-300 hover:text-indigo-600 disabled:pointer-events-none disabled:opacity-30"
+                        aria-label="Next images">
+                        <x-icons name="chevron-right" class="h-4 w-4" />
+                    </button>
                 </div>
             </div>
 
             {{-- Info --}}
             <div class="flex flex-col">
-                <p class="text-sm font-medium uppercase tracking-wide text-gray-400">{{ $product['category_name'] }}</p>
+                <p class="text-sm font-medium uppercase tracking-wide text-gray-400">{{ $product->category->name }}</p>
                 <h1 class="mt-1 text-3xl font-bold tracking-tight text-gray-900">{{ $product['name'] }}</h1>
 
                 <div class="mt-5 flex items-end gap-3">

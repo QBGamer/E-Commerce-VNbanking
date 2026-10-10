@@ -22,7 +22,7 @@
     @endif
 
     <a href="{{ route('products.detail', $product['slug']) }}" class="relative aspect-square overflow-hidden bg-gray-100">
-        <img src="{{ $product->image }}" alt="{{ $product->name }}"
+        <img src="{{ $product->images[0]->image ?? 'https://placehold.co/600x600?text=No+Image' }}" alt="{{ $product->name }}"
             class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
             loading="lazy" />
         @if ($isSoldOut)

@@ -21,6 +21,15 @@
     overflow: hidden;
 }
 
+/* Ẩn thanh scrollbar nhưng vẫn cuộn được (dùng cho strip thumbnail) */
+.no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
 /* Pagination — theme indigo (paginate) (simple paginate) */
 nav[aria-label="Pagination Navigation"] { justify-content: center; }
 

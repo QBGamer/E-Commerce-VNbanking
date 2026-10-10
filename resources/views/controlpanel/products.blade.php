@@ -115,7 +115,11 @@
                         <tr class="hover:bg-gray-50" :id="'product-' + product.id">
                             <td class="px-6 py-3.5">
                                 <div class="flex items-center gap-3">
-                                    <img :src="product.image" :alt="product.name" class="h-10 w-10 rounded-lg border border-gray-100 object-cover" />
+                                    <img
+                                        :src="product.images && product.images.length ? product.images[0].image : 'https://placehold.co/600x600?text=No+Image'"
+                                        :alt="product.name"
+                                        class="h-10 w-10 rounded-lg border border-gray-100 object-cover"
+                                    />
                                     <div>
                                         <span class="block font-medium text-gray-800" x-text="product.name"></span>
                                         <span class="block text-xs text-gray-500" x-text="product.sku"></span>

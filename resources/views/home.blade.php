@@ -28,7 +28,7 @@
                         @foreach($latestProducts as $product)
                             <a href="{{ route('products.detail', $product['slug']) }}"">
                                 <div class="overflow-hidden rounded-2xl bg-white p-3 shadow-lg">
-                                    <img src="{{ $product['image'] }}" alt="{{ $product['name'] }}" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
+                                    <img src="{{ $product['images'][0]['image'] ?? 'https://placehold.co/600x600?text=No+Image' }}" alt="{{ $product['name'] }}" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
                                     <p class="mt-2 text-sm font-semibold text-gray-900">{{ $product['name'] }}</p>
                                     <p class="text-xs font-medium text-indigo-600">${{ number_format($product['price'], 2) }}</p>
                                 </div>

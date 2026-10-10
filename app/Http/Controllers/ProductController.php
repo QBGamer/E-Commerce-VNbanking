@@ -20,7 +20,7 @@ class ProductController extends Controller
         $q    = trim((string) $request->query('query', ''));
         $sort = $request->query('sort_by', 'featured');
 
-        $query = Product::with('category')->where('status', 'active');
+        $query = Product::with(['category', 'images'])->where('status', 'active');
 
         if ($validCategory) {
             $query->whereHas('category', fn ($c) => $c->where('slug', $validCategory));
@@ -80,12 +80,6 @@ class ProductController extends Controller
         }
 
         $productImages = collect();
-        $productImages->push([
-            'id' => 0,
-            'url' => Str::startsWith($product->image, ['http://', 'https://'])
-                ? $product->image
-                : Storage::url($product->image),
-        ]);
 
         $productImages = $productImages->merge(
             ProductImage::where('product_id', $product->id)

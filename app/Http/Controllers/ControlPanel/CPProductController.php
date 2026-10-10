@@ -24,7 +24,11 @@ class CPProductController extends Controller
             'price'       => (float) $product->price,
             'stock'       => (int) $product->stock,
             'status'      => $product->status,
-            'image'       => $product->image,
+            'images' => $product->images->map(fn($img) => [
+                'id' => $img->id,
+                'image' => $img->image,
+                'position' => $img->position,
+            ])->values()->toArray(),
             'badge'       => $product->badge,
             'category'    => [
                 'id'   => $product->category?->id,
@@ -47,7 +51,7 @@ class CPProductController extends Controller
         $status = $request->query('status');
         $p_min = $request->query('price_min');
         $p_max = $request->query('price_max');
-        $query = Product::with('category');
+        $query = Product::with(['category', 'images']);
 
         if ($validCategory) $query->whereHas('category', fn ($c) => $c->where('slug', $validCategory));
         elseif ($category) $query->whereRaw('1 = 0');
