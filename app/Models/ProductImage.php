@@ -22,6 +22,7 @@ class ProductImage extends Model
         return $this->belongsTo(Product::class);
     }
 
+    // get{StudlyCase}Attribute images->url will call getUrlAttribute() to get the value of the url attribute
     public function getUrlAttribute(): string
     {
         if ($this->image === null) {
