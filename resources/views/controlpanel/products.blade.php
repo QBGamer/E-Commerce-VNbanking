@@ -116,7 +116,7 @@
                             <td class="px-6 py-3.5">
                                 <div class="flex items-center gap-3">
                                     <img
-                                        :src="product.images && product.images.length ? product.images[0].image : 'https://placehold.co/600x600?text=No+Image'"
+                                        :src="product.images && product.images.length ? product.images[0].url : 'https://placehold.co/600x600?text=No+Image'"
                                         :alt="product.name"
                                         class="h-10 w-10 rounded-lg border border-gray-100 object-cover"
                                     />
@@ -149,7 +149,7 @@
                                     <button @click="openModal('product-view', product)" type="button" class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700" title="View">
                                         <x-icons name="eye" class="w-4.5 h-4.5" />
                                     </button>
-                                    <button @click="openModal('product-form', { ...product, category: product.category?.slug ?? '' })" type="button" class="rounded-lg p-2 text-gray-400 hover:bg-indigo-50 hover:text-indigo-600" title="Edit">
+                                    <button @click="openModal('product-form', { ...product, category: product.category?.slug ?? '', gallery: (product.images ?? []).map(img => ({ id: img.id, url: img.url, file: null })) })" type="button" class="rounded-lg p-2 text-gray-400 hover:bg-indigo-50 hover:text-indigo-600" title="Edit">
                                         <x-icons name="edit" class="w-4.5 h-4.5" />
                                     </button>
                                     <button @click="openModal('product-delete', { id: product.id, name: product.name })" type="button" class="rounded-lg p-2 text-gray-400 hover:bg-red-50 hover:text-red-600" title="Delete">
@@ -188,10 +188,24 @@
     </x-modal>
     <x-modal id="product-view" title="Product details" max-width="max-w-xl">
         <div class="space-y-4">
-            <template x-if="payload?.image">
-                <img :src="'/images/products/' + payload.image" :alt="payload?.name" class="h-44 w-full rounded-xl object-cover">
+            <template x-if="(payload?.images?.length ?? 0) > 0">
+                <div class="space-y-2">
+                    <img :src="(payload.images[payload.viewIndex ?? 0] ?? payload.images[0]).url" :alt="payload?.name" class="h-44 w-full rounded-xl object-cover">
+                    <div class="flex gap-2 overflow-x-auto py-1 no-scrollbar" x-show="payload.images.length > 1">
+                        <template x-for="(img, i) in payload.images" :key="img.id">
+                            <button
+                                type="button"
+                                @click="payload.viewIndex = i"
+                                :class="i === (payload.viewIndex ?? 0) ? 'ring-2 ring-indigo-500' : 'border-gray-100'"
+                                class="h-14 w-14 shrink-0 overflow-hidden rounded-lg border bg-white"
+                            >
+                                <img :src="img.url" class="h-full w-full object-cover">
+                            </button>
+                        </template>
+                    </div>
+                </div>
             </template>
-            <template x-if="!payload?.image">
+            <template x-if="(payload?.images?.length ?? 0) === 0">
                 <div class="flex h-44 w-full items-center justify-center rounded-xl bg-gray-100 text-gray-400">
                     <x-icons name="box" class="w-10 h-10" />
                 </div>
@@ -241,7 +255,7 @@
             'category' => '',
             'price' => '',
             'stock' => '',
-            'image' => '',
+            'gallery' => [],
             'badge' => '',
             'status' => 'active',
             'description' => '',
@@ -277,10 +291,42 @@
                 <input type="number" min="0" x-model="form.stock" placeholder="50"
                     class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
             </div>
-            <div>
-                <label class="mb-1.5 block text-sm font-medium text-gray-700">Image URL</label>
-                <input type="text" x-model="form.image" placeholder="https://..."
-                    class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+            <div class="sm:col-span-2">
+                <label class="mb-1.5 block text-sm font-medium text-gray-700">Product images</label>
+                <div class="rounded-xl border border-gray-200 p-4">
+                    <input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        @change="addGalleryFiles($event, form)"
+                        class="block w-full text-sm text-gray-500 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-indigo-600 hover:file:bg-indigo-100"
+                    >
+                    <div x-ref="gallery" x-init="initGallerySortable($refs.gallery, $data)" class="mt-3 space-y-2">
+                        <template x-for="(img, index) in (form.gallery ?? [])" :key="index">
+                            <div class="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50 p-2">
+                                <span class="gallery-handle cursor-grab text-gray-400 active:cursor-grabbing" title="Drag to reorder">
+                                    <x-icons name="grip-horizontal" class="w-5 h-5" />
+                                </span>
+                                <img :src="img.url" class="h-12 w-12 shrink-0 rounded-md border border-gray-200 object-cover">
+                                <span class="text-xs font-semibold text-gray-500" x-text="'#' + (index + 1)"></span>
+                                <div class="ml-auto flex items-center gap-1">
+                                    <button type="button" @click="galleryMove(form.gallery, index, -1)" :disabled="index === 0" class="rounded-lg p-1.5 text-gray-400 hover:bg-white hover:text-indigo-600 disabled:cursor-not-allowed disabled:opacity-30" title="Move up">
+                                        <x-icons name="chevron-up" class="w-4 h-4" />
+                                    </button>
+                                    <button type="button" @click="galleryMove(form.gallery, index, 1)" :disabled="index === (form.gallery ?? []).length - 1" class="rounded-lg p-1.5 text-gray-400 hover:bg-white hover:text-indigo-600 disabled:cursor-not-allowed disabled:opacity-30" title="Move down">
+                                        <x-icons name="chevron-down" class="w-4 h-4" />
+                                    </button>
+                                    <button type="button" @click="galleryRemove(form.gallery, index)" class="rounded-lg p-1.5 text-gray-400 hover:bg-white hover:text-red-600" title="Remove image">
+                                        <x-icons name="trash" class="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
+                        <p class="text-xs text-gray-400" x-show="(form.gallery ?? []).length === 0">
+                            No images yet. Upload files, then drag or use the arrows to reorder.
+                        </p>
+                    </div>
+                </div>
             </div>
             <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700">Status</label>
@@ -348,15 +394,34 @@
             const url = id
                 ? "{{ route('products.update', ':id') }}".replace(':id', id)
                 : "{{ route('products.store') }}";
+
+            const fd = new FormData();
+            fd.append('name', form.name ?? '');
+            fd.append('slug', form.slug ?? '');
+            fd.append('sku', form.sku ?? '');
+            fd.append('badge', form.badge ?? '');
+            fd.append('status', form.status ?? 'active');
+            fd.append('description', form.description ?? '');
+            fd.append('price', form.price ?? 0);
+            fd.append('stock', form.stock ?? 0);
+            fd.append('category', form.category ?? '');
+
+            let fileIndex = 0;
+            const gallery = form.gallery ?? [];
+            const order = gallery.map(item => item.id ? `e:${item.id}` : `f:${fileIndex++}`);
+            fd.append('image_order', JSON.stringify(order));
+            gallery.filter(item => item.file).forEach(item => fd.append('images[]', item.file));
+
+            if (id) fd.append('_method', 'PUT');
+
             try {
                 const response = await fetch(url, {
-                    method: id ? 'PUT' : 'POST',
+                    method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
                         'Accept': 'application/json',
-                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(form)
+                    body: fd,
                 });
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.message || 'Failed to save product.');
@@ -369,6 +434,42 @@
             } catch (error) {
                 Alpine.store('toasts').notify(error.message, 'error');
             }
+        }
+
+        function addGalleryFiles(event, form) {
+            if (!Array.isArray(form.gallery)) form.gallery = [];
+            for (const f of event.target.files) {
+                form.gallery.push({ id: null, url: URL.createObjectURL(f), file: f });
+            }
+            event.target.value = '';
+        }
+
+        function galleryMove(images, index, direction) {
+            const target = index + direction;
+            if (target < 0 || target >= images.length) return;
+            const [moved] = images.splice(index, 1);
+            images.splice(target, 0, moved);
+        }
+
+        function galleryRemove(images, index) {
+            const item = images[index];
+            if (item && item.file && item.url.startsWith('blob:')) URL.revokeObjectURL(item.url);
+            if (index >= 0) images.splice(index, 1);
+        }
+
+        function initGallerySortable(el, $data) {
+            if (!el || el.dataset.sortableInit) return;
+            el.dataset.sortableInit = '1';
+            new Sortable(el, {
+                animation: 150,
+                ghostClass: 'opacity-40',
+                handle: '.gallery-handle',
+                onEnd(evt) {
+                    const images = $data.form.gallery;
+                    const [moved] = images.splice(evt.oldIndex, 1);
+                    if (moved) images.splice(evt.newIndex, 0, moved);
+                },
+            });
         }
     </script>
     {{-- Inventory summary --}}

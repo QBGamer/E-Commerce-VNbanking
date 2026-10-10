@@ -1,7 +1,9 @@
 import './bootstrap';
 import Alpine from 'alpinejs';
+import Sortable from 'sortablejs';
 
 window.Alpine = Alpine;
+window.Sortable = Sortable;
 window.openModal  = (id, payload) => window.dispatchEvent(new CustomEvent('open-modal',  { detail: { id, payload } }));
 window.closeModal = () => window.dispatchEvent(new CustomEvent('close-modal'));
 document.addEventListener('alpine:init', () => {

@@ -4,8 +4,10 @@ namespace App\Http\Controllers\ControlPanel;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Product;
 use App\Models\Category;
 
@@ -13,7 +15,7 @@ class CPProductController extends Controller
 {
     public static function presentProduct(Product $product)
     {
-        $product->loadMissing('category');
+        $product->loadMissing(['category', 'images']);
 
         return [
             'id'          => $product->id,
@@ -27,6 +29,7 @@ class CPProductController extends Controller
             'images' => $product->images->map(fn($img) => [
                 'id' => $img->id,
                 'image' => $img->image,
+                'url' => $img->url,
                 'position' => $img->position,
             ])->values()->toArray(),
             'badge'       => $product->badge,
@@ -36,6 +39,74 @@ class CPProductController extends Controller
                 'slug' => $product->category?->slug,
             ],
         ];
+    }
+
+    private static function imageRules(): array
+    {
+        return [
+            'image_order' => 'required|string',
+            'images' => 'nullable|array|max:6',
+            'images.*' => 'file|mimes:jpeg,jpg,png,webp|max:4096',
+        ];
+    }
+
+    /**
+     * image_order is a JSON array of tokens: "e:{imageId}" keeps an existing row,
+     * "f:{index}" stores the uploaded file at that index in request files.
+     * Position is the token's index; any existing row not listed is removed.
+     */
+    private function syncImages(Product $product, ?string $imageOrder, array $files): void
+    {
+        $tokens = json_decode($imageOrder ?? '[]', true);
+        if (! is_array($tokens)) {
+            $tokens = [];
+        }
+
+        $existing = $product->images()->get()->keyBy('id');
+        $existingIds = $existing->keys();
+        $files = array_values($files);
+        $kept = [];
+        $position = 0;
+
+        foreach ($tokens as $token) {
+            if (! is_string($token)) {
+                continue;
+            }
+
+            if (Str::startsWith($token, 'e:')) {
+                $image = $existing->get((int) substr($token, 2));
+                if (! $image || in_array($image->id, $kept, true)) {
+                    continue;
+                }
+                $image->update(['position' => $position]);
+                $kept[] = $image->id;
+                $position++;
+                continue;
+            }
+
+            if (Str::startsWith($token, 'f:')) {
+                $file = $files[(int) substr($token, 2)] ?? null;
+                if (! $file instanceof UploadedFile || ! $file->isValid()) {
+                    continue;
+                }
+                $product->images()->create([
+                    'image' => $file->store('products', 'public'),
+                    'position' => $position,
+                ]);
+                $position++;
+            }
+        }
+
+        $product->images()
+            ->whereIn('id', $existingIds)
+            ->whereNotIn('id', $kept)
+            ->get()
+            ->each(function ($image) {
+                if ($image->isLocal()) {
+                    Storage::disk('public')->delete($image->image);
+                }
+                $image->delete();
+            });
     }
 
     //CURD
@@ -100,10 +171,11 @@ class CPProductController extends Controller
             'status' => 'nullable|in:active,inactive',
             'slug' => 'nullable|string|max:255',
             'sku' => 'nullable|string|max:100',
-            'image' => 'nullable|string|max:255',
             'badge' => 'nullable|string|max:50',
             'category' => 'required|exists:categories,slug',
         ]);
+
+        $request->validate(static::imageRules());
 
         if (empty($data['slug'])) {
             $data['slug'] = Str::slug($data['name']);
@@ -116,6 +188,10 @@ class CPProductController extends Controller
         $product->category_id = $category->id;
         $product->description = $data['description'] ?? '';
         $product->save();
+
+        $this->syncImages($product, $request->input('image_order'), $request->file('images', []));
+
+        $product->load('images');
 
         return response()->json([
             'message' => 'Product created successfully.',
@@ -135,10 +211,11 @@ class CPProductController extends Controller
             'status' => 'nullable|in:active,inactive',
             'slug' => 'nullable|string|max:255',
             'sku' => 'nullable|string|max:100',
-            'image' => 'nullable|string|max:255',
             'badge' => 'nullable|string|max:50',
             'category' => 'required|exists:categories,slug',
         ]);
+
+        $request->validate(static::imageRules());
 
         if (empty($data['slug'])) {
             $data['slug'] = Str::slug($data['name']);
@@ -151,6 +228,10 @@ class CPProductController extends Controller
         $product->description = $data['description'] ?? '';
         $product->save();
 
+        $this->syncImages($product, $request->input('image_order'), $request->file('images', []));
+
+        $product->load('images');
+
         return response()->json([
             'message' => 'Product updated successfully.',
             'product' => $this->presentProduct($product),
@@ -160,10 +241,15 @@ class CPProductController extends Controller
     public function destroy($id)
     {
         $product = Product::findOrFail($id);
-        if ($product->image && file_exists(public_path('images/products/' . $product->image))) {
-            unlink(public_path('images/products/' . $product->image));
-        }
+
+        $product->images->each(function ($image) {
+            if ($image->isLocal()) {
+                Storage::disk('public')->delete($image->image);
+            }
+        });
+        $product->images()->delete();
         $product->delete();
+
         return response()->json([
             'message' => $id . ': Product removed successfully.',
         ]);

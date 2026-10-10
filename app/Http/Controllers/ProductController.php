@@ -6,8 +6,6 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\ProductImage;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
@@ -79,21 +77,13 @@ class ProductController extends Controller
             $relatedProducts = $relatedProducts->merge($additionalProducts);
         }
 
-        $productImages = collect();
-
-        $productImages = $productImages->merge(
-            ProductImage::where('product_id', $product->id)
-                ->orderBy('position')
-                ->get()
-                ->map(function ($img) {
-                    return [
-                        'id' => $img->id,
-                        'url' => Str::startsWith($img->image, ['http://', 'https://'])
-                            ? $img->image
-                            : Storage::url($img->image),
-                    ];
-                })
-        );
+        $productImages = ProductImage::where('product_id', $product->id)
+            ->orderBy('position')
+            ->get()
+            ->map(fn ($img) => [
+                'id' => $img->id,
+                'url' => $img->url,
+            ]);
 
         return view('products.detail', [
             'product'    => $product,
