@@ -468,6 +468,7 @@
                     const images = $data.form.gallery;
                     const [moved] = images.splice(evt.oldIndex, 1);
                     if (moved) images.splice(evt.newIndex, 0, moved);
+                    console.log('Gallery reordered:', images.map(img => img.id ?? img.file?.name));
                 },
             });
         }

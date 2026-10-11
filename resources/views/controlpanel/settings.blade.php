@@ -37,7 +37,7 @@
                 </section>
 
                 {{-- Payment methods --}}
-                <section class="rounded-2xl border border-gray-200 bg-white p-6">
+                {{-- <section class="rounded-2xl border border-gray-200 bg-white p-6">
                     <h2 class="text-lg font-bold text-gray-900">Payment Methods</h2>
                     <p class="text-sm text-gray-500">Enable the payment gateways customers can use at checkout.</p>
 
@@ -70,10 +70,10 @@
                             </li>
                         @endforeach
                     </ul>
-                </section>
+                </section> --}}
 
                 {{-- Shipping methods --}}
-                <section class="rounded-2xl border border-gray-200 bg-white p-6">
+                {{-- <section class="rounded-2xl border border-gray-200 bg-white p-6">
                     <h2 class="text-lg font-bold text-gray-900">Shipping Methods</h2>
                     <p class="text-sm text-gray-500">Configure delivery options and their fees.</p>
 
@@ -105,7 +105,7 @@
                             </li>
                         @endforeach
                     </ul>
-                </section>
+                </section> --}}
             </div>
 
             {{-- Side column --}}
@@ -165,7 +165,7 @@
                 </section>
 
                 {{-- Quick settings --}}
-                <section class="rounded-2xl border border-gray-200 bg-white p-6 space-y-5">
+                {{-- <section class="rounded-2xl border border-gray-200 bg-white p-6 space-y-5">
                     <div>
                         <h2 class="font-bold text-gray-900">General Preferences</h2>
                     </div>
@@ -187,10 +187,10 @@
                             </label>
                         @endforeach
                     </div>
-                </section>
+                </section> --}}
 
                 {{-- Danger zone --}}
-                <section class="rounded-2xl border border-red-200 bg-red-50/50 p-6">
+                {{-- <section class="rounded-2xl border border-red-200 bg-red-50/50 p-6">
                     <h2 class="font-bold text-red-700">Danger Zone</h2>
                     <p class="mt-1 text-sm text-red-600/80">Irreversible actions that affect your entire store.</p>
                     <div class="mt-4 flex flex-col gap-2">
@@ -201,7 +201,7 @@
                             Delete Store
                         </x-button>
                     </div>
-                </section>
+                </section> --}}
             </div>
         </div>
     </div>
