@@ -15,11 +15,11 @@
         @php
             $menu = [
                 ['route' => 'controlpanel.dashboard', 'label' => 'Dashboard', 'icon' => 'dashboard'],
-                ['route' => 'controlpanel.products', 'label' => 'Products', 'icon' => 'box'],
+                ['route' => 'controlpanel.products.index', 'label' => 'Products', 'icon' => 'box'],
                 ['route' => 'controlpanel.orders', 'label' => 'Orders', 'icon' => 'receipt'],
                 ['route' => 'controlpanel.customers', 'label' => 'Customers', 'icon' => 'users'],
                 ['route' => 'controlpanel.coupons', 'label' => 'Coupons', 'icon' => 'tag'],
-                ['route' => 'controlpanel.settings', 'label' => 'Settings', 'icon' => 'settings'],
+                ['route' => 'controlpanel.settings.index', 'label' => 'Settings', 'icon' => 'settings'],
             ];
         @endphp
         @foreach ($menu as $item)

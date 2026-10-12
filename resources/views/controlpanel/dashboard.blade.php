@@ -83,7 +83,7 @@
         <div class="rounded-2xl border border-gray-200 bg-white">
             <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4">
                 <h2 class="font-semibold text-gray-900">Low Stock Products</h2>
-                <a href="{{ route('controlpanel.products') }}" class="text-sm font-semibold text-indigo-600 hover:underline">Manage</a>
+                <a href="{{ route('controlpanel.products.index') }}" class="text-sm font-semibold text-indigo-600 hover:underline">Manage</a>
             </div>
             <ul class="divide-y divide-gray-100">
                 @foreach ($lowStock as $product)

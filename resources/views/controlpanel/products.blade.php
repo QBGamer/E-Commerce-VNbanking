@@ -24,7 +24,7 @@
                         ? 'bg-indigo-600 text-white'
                         : 'border border-gray-300 bg-white text-gray-600 hover:border-indigo-300';
                 @endphp
-                <a href="{{ route('controlpanel.products') }}" class="rounded-full px-4 py-2 text-sm font-medium {{ $chip($isAll) }}">All</a>
+                <a href="{{ route('controlpanel.products.index') }}" class="rounded-full px-4 py-2 text-sm font-medium {{ $chip($isAll) }}">All</a>
                 <a href="{{ $queryUrl(['status' => 'active']) }}" class="rounded-full px-4 py-2 text-sm font-medium {{ $chip($isActive) }}">Active</a>
                 <a href="{{ $queryUrl(['stock' => 'low']) }}" class="rounded-full px-4 py-2 text-sm font-medium {{ $chip($isLow) }}">Low Stock</a>
                 <a href="{{ $queryUrl(['status' => 'inactive']) }}" class="rounded-full px-4 py-2 text-sm font-medium {{ $chip($isOut) }}">Out of Stock</a>
@@ -38,7 +38,7 @@
             </p>
         </div>
 
-        <form method="GET" action="{{ route('controlpanel.products') }}" class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
+        <form method="GET" action="{{ route('controlpanel.products.index') }}" class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
             {{-- Product --}}
             <div class="sm:col-span-2">
                 <label class="mb-1.5 block text-sm font-medium text-gray-700">Product</label>
@@ -84,7 +84,7 @@
             {{-- Actions --}}
             <div class="flex flex-wrap items-end gap-2 sm:col-span-2 lg:col-span-2">
                 <x-button type="submit">Apply Filters</x-button>
-                <a href="{{ route('controlpanel.products') }}" class="inline-flex items-center rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50">Reset</a>
+                <a href="{{ route('controlpanel.products.index') }}" class="inline-flex items-center rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50">Reset</a>
             </div>
         </form>
     </div>
@@ -374,7 +374,7 @@
         }
 
         function removeProduct(id) {
-            fetch("{{ route('products.destroy', ':id') }}".replace(':id', id), {
+            fetch("{{ route('controlpanel.products.update', ':id') }}".replace(':id', id), {
                 method: 'DELETE',
                 headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
             })
@@ -392,8 +392,8 @@
 
         async function savePayload(id, form) {
             const url = id
-                ? "{{ route('products.update', ':id') }}".replace(':id', id)
-                : "{{ route('products.store') }}";
+                ? "{{ route('controlpanel.products.update', ':id') }}".replace(':id', id)
+                : "{{ route('controlpanel.products.store') }}";
 
             const fd = new FormData();
             fd.append('name', form.name ?? '');

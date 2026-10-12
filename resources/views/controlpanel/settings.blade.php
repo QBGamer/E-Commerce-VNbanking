@@ -31,7 +31,7 @@
                             <textarea rows="2" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">{{ $storeInfo['address'] }}</textarea>
                         </div>
                         <div class="sm:col-span-2">
-                            <x-button type="submit" icon="check">Save Changes</x-button>
+                            <x-button type="button" icon="check" @click="saveSettings">Save Changes</x-button>
                         </div>
                     </form>
                 </section>
@@ -208,6 +208,41 @@
 
 @push('scripts')
     <script>
+        function saveSettings() {
+            try{
+                fetch("{{ route('controlpanel.settings.update') }}", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        store_name: document.querySelector('[name="store_name"]').value,
+                        tagline: document.querySelector('[name="tagline"]').value,
+                        email: document.querySelector('[name="email"]').value,
+                        phone: document.querySelector('[name="phone"]').value,
+                        address: document.querySelector('textarea').value
+                    })
+                })
+                .then(async response => {
+                    const data = await response.json();
+                    if (!response.ok) {
+                        throw new Error(data.message || Object.values(data.errors).flat().join(', ') || 'Failed to save store information.');
+                    }
+                    Alpine.store('toasts').notify(data.message, 'success');
+                })
+                .catch(error => {
+                    Alpine.store('toasts').notify(error.message, 'error');
+                });
+            }
+            catch (error) {
+                console.error(error);
+                Alpine.store('toasts').notify(error.message, 'error');
+            }
+        }
+
+
         document.addEventListener('alpine:init', () => {
             Alpine.data('settingsPanel', () => ({
                 payments: { card: true, vnpay: true, paypal: true, cod: true, momo: false },

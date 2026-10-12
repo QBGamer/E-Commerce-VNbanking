@@ -6,6 +6,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartItemController;
 use App\Http\Controllers\ControlPanel\CPProductController;
+use App\Http\Controllers\ControlPanel\CPStoreController;
 // use App\Http\Controllers\ControlPanelController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -22,9 +23,6 @@ Route::view('/account', 'auth.account')->name('account');
 Route::prefix('products')->name('products.')->group(function () {
     Route::get('/', [ProductController::class, 'index'])->name('index');
     Route::get('/{slug}', [ProductController::class, 'show'])->name('detail');
-    Route::post('/', [CPProductController::class, 'store'])->middleware(['auth', 'can:access-control-panel'])->name('store');
-    Route::put('/{id}', [CPProductController::class, 'update'])->middleware(['auth', 'can:access-control-panel'])->name('update');
-    Route::delete('/{id}', [CPProductController::class, 'destroy'])->middleware(['auth', 'can:access-control-panel'])->name('destroy');
 });
 
 Route::prefix('cart')->name('cart.')->middleware('auth')->group(function () {
@@ -36,11 +34,19 @@ Route::prefix('cart')->name('cart.')->middleware('auth')->group(function () {
 
 Route::prefix('control-panel')->name('controlpanel.')->middleware(['auth', 'can:access-control-panel'])->group(function () {
     Route::view('/', 'controlpanel.dashboard')->name('dashboard');
-    Route::get('/products', [CPProductController::class, 'index'])->name('products');
+    Route::prefix('products')->name('products.')->group(function () {
+        Route::get('/', [CPProductController::class, 'index'])->name('index');
+        Route::post('/', [CPProductController::class, 'store'])->name('store');
+        Route::put('/{id}', [CPProductController::class, 'update'])->name('update');
+        Route::delete('/{id}', [CPProductController::class, 'destroy'])->name('destroy');
+    });
     Route::view('/orders', 'controlpanel.orders')->name('orders');
     Route::view('/customers', 'controlpanel.customers')->name('customers');
     Route::view('/coupons', 'controlpanel.coupons')->name('coupons');
-    Route::view('/settings', 'controlpanel.settings')->name('settings');
+    Route::prefix('settings')->name('settings.')->group(function () {
+        Route::view('/', 'controlpanel.settings')->name('index');
+        Route::post('/', [CPStoreController::class, 'update'])->name('update');
+    });
 });
 
 Route::view('/checkout', 'cart.checkout')->name('checkout');
