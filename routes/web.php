@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProductController;
-use App\Http\Controllers\CartItemsController;
+use App\Http\Controllers\CartItemController;
 use App\Http\Controllers\ControlPanel\CPProductController;
 // use App\Http\Controllers\ControlPanelController;
 
@@ -28,10 +28,10 @@ Route::prefix('products')->name('products.')->group(function () {
 });
 
 Route::prefix('cart')->name('cart.')->middleware('auth')->group(function () {
-    Route::get('/', [CartItemsController::class, 'index'])->name('index');
-    Route::post('/', [CartItemsController::class, 'store'])->name('store');
-    Route::put('/{id}', [CartItemsController::class, 'update'])->name('update');
-    Route::delete('/{id}', [CartItemsController::class, 'destroy'])->name('destroy');
+    Route::get('/', [CartItemController::class, 'index'])->name('index');
+    Route::post('/', [CartItemController::class, 'store'])->name('store');
+    Route::put('/{id}', [CartItemController::class, 'update'])->name('update');
+    Route::delete('/{id}', [CartItemController::class, 'destroy'])->name('destroy');
 });
 
 Route::prefix('control-panel')->name('controlpanel.')->middleware(['auth', 'can:access-control-panel'])->group(function () {

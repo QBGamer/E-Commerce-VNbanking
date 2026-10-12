@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\CartItems;
+use App\Models\CartItem;
 
-class CartItemsController extends Controller
+class CartItemController extends Controller
 {
     //show
     //add
@@ -15,7 +15,7 @@ class CartItemsController extends Controller
 
     public function index()
     {
-        $cartItems = CartItems::with('product')->where('user_id', auth()->id())->get();
+        $cartItems = CartItem::with('product', 'product.category', 'product.images')->where('user_id', auth()->id())->get();
         return view('cart.index', compact('cartItems'));
     }
 
@@ -29,7 +29,7 @@ class CartItemsController extends Controller
             'quantity' => 'required|integer|min:1',
         ]);
 
-        $cartItem = CartItems::where('user_id', auth()->id())
+        $cartItem = CartItem::where('user_id', auth()->id())
             ->where('product_id', $request->product_id)
             ->first();
 
@@ -37,7 +37,7 @@ class CartItemsController extends Controller
             $cartItem->quantity += $request->quantity;
             $cartItem->save();
         } else {
-            CartItems::create([
+            CartItem::create([
                 'user_id' => auth()->id(),
                 'product_id' => $request->product_id,
                 'quantity' => $request->quantity,
@@ -56,11 +56,11 @@ class CartItemsController extends Controller
             'quantity' => 'required|integer|min:1',
         ]);
 
-        $cartItem = CartItems::where('user_id', auth()->id())->where('id', $id)->firstOrFail();
+        $cartItem = CartItem::where('user_id', auth()->id())->where('id', $id)->firstOrFail();
         $cartItem->quantity = $request->quantity;
         $cartItem->save();
 
-        $cartItems = CartItems::with('product')->where('user_id', auth()->id())->get();
+        $cartItems = CartItem::with('product')->where('user_id', auth()->id())->get();
         $subtotal = $cartItems->sum(fn ($i) => $i->product->price * $i->quantity);
         $total = $subtotal; // Assuming no additional fees for simplicity
 
@@ -77,10 +77,10 @@ class CartItemsController extends Controller
         if (!auth()->check()) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
-        $cartItem = CartItems::where('user_id', auth()->id())->where('id', $id)->firstOrFail();
+        $cartItem = CartItem::where('user_id', auth()->id())->where('id', $id)->firstOrFail();
         $cartItem->delete();
 
-        $cartItems = CartItems::with('product')->where('user_id', auth()->id())->get();
+        $cartItems = CartItem::with('product')->where('user_id', auth()->id())->get();
         $subtotal = $cartItems->sum(fn ($i) => $i->product->price * $i->quantity);
         $total = $subtotal; // Assuming no additional fees for simplicity
 

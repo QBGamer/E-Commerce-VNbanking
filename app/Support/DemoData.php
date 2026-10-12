@@ -13,7 +13,7 @@ class DemoData
     public static function data(): array
     {
         return [
-            'storeInfo' => self::storeInfo(),
+            // 'storeInfo' => self::storeInfo(),
             'categories' => self::categories(),
             'products' => self::products(),
             'cartItems' => self::cartItems(),
