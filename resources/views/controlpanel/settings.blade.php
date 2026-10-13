@@ -1,26 +1,13 @@
 @extends('controlpanel.layouts.app', ['title' => 'Settings'])
 
 @section('content')
-    <div x-data="settingsPanel()">
+    <div id="settings-root" x-data="settingsPanel()">
         <div class="grid grid-cols-1 gap-6 xl:grid-cols-3">
             <div class="space-y-6 xl:col-span-2">
                 {{-- Store information --}}
                 <section class="rounded-2xl border border-gray-200 bg-white p-6">
                     <h2 class="text-lg font-bold text-gray-900">Store Information</h2>
                     <p class="text-sm text-gray-500">Update your store name, logo and contact details.</p>
-
-                    <div class="mt-6 flex items-center gap-4">
-                        <span class="flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-600 text-white">
-                            <x-icons name="shopping-bag" class="w-8 h-8" />
-                        </span>
-                        <div>
-                            <button type="button" class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-                                <x-icons name="image" class="w-4 h-4" /> Upload Logo
-                            </button>
-                            <p class="mt-1 text-xs text-gray-400">PNG or JPG, up to 2MB</p>
-                        </div>
-                    </div>
-
                     <form class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <x-form-input name="store_name" label="Store name" :value="$storeInfo['name']" required />
                         <x-form-input name="tagline" label="Tagline" :value="$storeInfo['tagline']" />
@@ -29,6 +16,24 @@
                         <div class="sm:col-span-2">
                             <label class="mb-1.5 block text-sm font-medium text-gray-700">Store address</label>
                             <textarea rows="2" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">{{ $storeInfo['address'] }}</textarea>
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="mb-1.5 block text-sm font-medium text-gray-700">Icon</label>
+                            <div class="flex items-center gap-4">
+                                <img x-show="faviconPreviewSrc" :src="faviconPreviewSrc" class="h-10 w-10 shrink-0 rounded-lg border border-gray-200 object-cover" alt="Favicon preview">
+                                <span x-show="!faviconPreviewSrc" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50 text-gray-400">
+                                    <x-icons name="image" class="w-5 h-5" />
+                                </span>
+                                <div>
+                                    <input
+                                        type="file"
+                                        accept="image/png,image/jpeg,image/webp"
+                                        @change="uploadFavicon($event.target)"
+                                        class="block w-full text-sm text-gray-500 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-indigo-600 hover:file:bg-indigo-100"
+                                    >
+                                    <p class="mt-1 text-xs text-gray-400">PNG, JPG or WebP &mdash; auto-converted to ICO (16/32/48/64/128/256px)</p>
+                                </div>
+                            </div>
                         </div>
                         <div class="sm:col-span-2">
                             <x-button type="button" icon="check" @click="saveSettings">Save Changes</x-button>
@@ -208,36 +213,64 @@
 
 @push('scripts')
     <script>
-        function saveSettings() {
-            try{
-                fetch("{{ route('controlpanel.settings.update') }}", {
+        function canvasToPngBlob(img, size) {
+            return new Promise(resolve => {
+                const canvas = document.createElement('canvas');
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext('2d');
+                const dim = Math.min(img.width, img.height);
+                const sx = (img.width - dim) / 2;
+                const sy = (img.height - dim) / 2;
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+                ctx.drawImage(img, sx, sy, dim, dim, 0, 0, size, size);
+                canvas.toBlob(resolve, 'image/png');
+            });
+        }
+
+        function imageToPngBlobs(file) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = async () => resolve(await Promise.all([16, 32, 48, 64, 128, 256].map(size => canvasToPngBlob(img, size))));
+                img.onerror = reject;
+                img.src = URL.createObjectURL(file);
+            });
+        }
+
+        async function saveSettings() {
+            try {
+                const fd = new FormData();
+                fd.append('store_name', document.querySelector('[name="store_name"]').value);
+                fd.append('tagline', document.querySelector('[name="tagline"]').value);
+                fd.append('email', document.querySelector('[name="email"]').value);
+                fd.append('phone', document.querySelector('[name="phone"]').value);
+                fd.append('address', document.querySelector('textarea').value);
+                const panel = Alpine.$data(document.querySelector('#settings-root'));
+                if (panel.faviconPngs.length) {
+                    panel.faviconPngs.forEach(png => fd.append('image[]', png, 'favicon.png'));
+                }
+
+                const response = await fetch("{{ route('controlpanel.settings.update') }}", {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
+                        'Accept': 'application/json'
                     },
-                    body: JSON.stringify({
-                        store_name: document.querySelector('[name="store_name"]').value,
-                        tagline: document.querySelector('[name="tagline"]').value,
-                        email: document.querySelector('[name="email"]').value,
-                        phone: document.querySelector('[name="phone"]').value,
-                        address: document.querySelector('textarea').value
-                    })
-                })
-                .then(async response => {
-                    const data = await response.json();
-                    if (!response.ok) {
-                        throw new Error(data.message || Object.values(data.errors).flat().join(', ') || 'Failed to save store information.');
-                    }
-                    Alpine.store('toasts').notify(data.message, 'success');
-                })
-                .catch(error => {
-                    Alpine.store('toasts').notify(error.message, 'error');
+                    body: fd
                 });
-            }
-            catch (error) {
-                console.error(error);
+                const data = await response.json();
+                if (!response.ok) {
+                    const message = data.message || (data.errors ? Object.values(data.errors).flat().join(', ') : 'Failed to save store information.');
+                    throw new Error(message);
+                }
+                Alpine.store('toasts').notify(data.message, 'success');
+                document.title = 'Settings · ' + document.querySelector('[name="store_name"]').value + ' Admin';
+                if (data.favicon_updated && data.url) {
+                    panel.faviconPreviewSrc = data.url;
+                    panel.faviconPngs = [];
+                }
+            } catch (error) {
                 Alpine.store('toasts').notify(error.message, 'error');
             }
         }
@@ -245,10 +278,28 @@
 
         document.addEventListener('alpine:init', () => {
             Alpine.data('settingsPanel', () => ({
+                faviconPngs: [],
+                faviconPreviewSrc: @js($storeInfo['icon'] ?? null),
                 payments: { card: true, vnpay: true, paypal: true, cod: true, momo: false },
                 shipping: { standard: true, express: true, free: true, pickup: false },
                 prefs: { low_stock_alert: true, auto_return: false, new_order_notify: true },
                 showStaffForm: false,
+
+                async uploadFavicon(input) {
+                    const file = input.files && input.files[0];
+                    if (!file) return;
+                    try {
+                        const blobs = await imageToPngBlobs(file);
+                        this.faviconPngs = blobs.filter(Boolean);
+                        if (this.faviconPngs.length) {
+                            this.faviconPreviewSrc = URL.createObjectURL(this.faviconPngs[0]);
+                        }
+                    } catch (error) {
+                        Alpine.store('toasts').notify('Could not read the selected image.', 'error');
+                    } finally {
+                        input.value = '';
+                    }
+                },
 
                 togglePayment(key) {
                     this.payments[key] = !this.payments[key];

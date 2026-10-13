@@ -4,7 +4,8 @@
             <div class="space-y-4">
                 <a href="{{ route('home') }}" class="flex items-center gap-2">
                     <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white">
-                        <x-icons name="shopping-bag" class="w-5 h-5" />
+                        {{-- <x-icons name="shopping-bag" class="w-5 h-5" /> --}}
+                        <image src="{{ $storeInfo['icon'] }}" alt="ShopHub Logo" class="rounded-lg"/>
                     </span>
                     <span class="text-xl font-extrabold tracking-tight text-gray-900">Shop<span class="text-indigo-600">Hub</span></span>
                 </a>
