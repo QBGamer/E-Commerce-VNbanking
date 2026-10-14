@@ -44,7 +44,7 @@ Route::prefix('control-panel')->name('controlpanel.')->middleware(['auth', 'can:
     Route::view('/customers', 'controlpanel.customers')->name('customers');
     Route::view('/coupons', 'controlpanel.coupons')->name('coupons');
     Route::prefix('settings')->name('settings.')->group(function () {
-        Route::view('/', 'controlpanel.settings')->name('index');
+        Route::get('/', [CPStoreController::class, 'index'])->name('index');
         Route::post('/', [CPStoreController::class, 'update'])->name('update');
     });
 });

@@ -6,9 +6,19 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Setting;
+use App\Models\User;
 
 class CPStoreController extends Controller
 {
+    public function index()
+    {
+        $users = User::all();
+        return view('controlpanel.settings',[
+            'users' => $users,
+        ]);
+    }
+
+    // function call in AppserviceProvider boot() to share data with all views
     public static function data(): array
     {
         return [

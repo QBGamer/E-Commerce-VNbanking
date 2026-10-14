@@ -121,11 +121,51 @@
                         <h2 class="font-bold text-gray-900">Staff & Admin Accounts</h2>
                         <x-button size="sm" icon="plus" @click="showStaffForm = !showStaffForm">Add</x-button>
                     </div>
-
+                    {{-- @php
+                        echo $users;
+                    @endphp --}}
                     <div x-cloak x-show="showStaffForm" class="border-b border-gray-100 p-4">
                         <form class="grid grid-cols-1 gap-3">
-                            <x-form-input name="s_name" label="Full name" placeholder="Staff name" />
-                            <x-form-input name="s_email" label="Email" type="email" placeholder="staff@shophub.demo" />
+                            <div x-data="{
+                                    open: false, search: '', selected: '',
+                                    options: @js(collect($users ?? [])->pluck('email')->values()),
+                                    get filtered() {
+                                        const q = this.search.trim().toLowerCase();
+                                        return q ? this.options.filter(e => e.toLowerCase().includes(q)) : this.options;
+                                    },
+                                    toggle() { this.open = !this.open; if (this.open) this.$nextTick(() => this.$refs.searchInput?.focus()); },
+                                    choose(email) { this.selected = email; this.open = false; this.search = ''; },
+                                }">
+                                <label class="mb-1.5 block text-sm font-medium text-gray-700">Email</label>
+                                <div class="relative" @click.outside="open = false" @keydown.escape="open = false">
+                                    <button type="button" @click="toggle()"
+                                        class="flex w-full items-center justify-between rounded-lg border border-gray-300 bg-white px-4 py-2 text-left text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+                                        <span :class="selected ? 'text-gray-900' : 'text-gray-400'" x-text="selected || 'Select a user email...'"></span>
+                                        <x-icons name="chevron-down" class="w-4 h-4 text-gray-400" />
+                                    </button>
+                                    <div x-cloak x-show="open" x-transition.opacity.duration.100ms
+                                        class="absolute z-20 mt-1 w-full overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg">
+                                        <div class="relative border-b border-gray-100">
+                                            <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                                                <x-icons name="search" class="w-4 h-4" />
+                                            </span>
+                                            <input x-model="search" x-ref="searchInput" type="text" placeholder="Search email..."
+                                                class="w-full border-0 py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-0">
+                                        </div>
+                                        <ul class="max-h-56 overflow-y-auto py-1">
+                                            <template x-for="email in filtered" :key="email">
+                                                <li>
+                                                    <button type="button" @click="choose(email)"
+                                                        class="block w-full truncate px-4 py-2 text-left text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700"
+                                                        x-text="email"></button>
+                                                </li>
+                                            </template>
+                                            <li x-show="filtered.length === 0" class="px-4 py-2 text-sm text-gray-400">No matches</li>
+                                        </ul>
+                                    </div>
+                                    <input type="hidden" name="s_email" :value="selected">
+                                </div>
+                            </div>
                             <div>
                                 <label class="mb-1.5 block text-sm font-medium text-gray-700">Role</label>
                                 <select name="s_role" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
@@ -134,7 +174,7 @@
                                     <option>Admin</option>
                                 </select>
                             </div>
-                            <x-button type="submit" size="sm" icon="check">Send Invitation</x-button>
+                            <x-button type="submit" size="sm" icon="check">Add User</x-button>
                         </form>
                     </div>
 
