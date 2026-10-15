@@ -169,12 +169,12 @@
                             <div>
                                 <label class="mb-1.5 block text-sm font-medium text-gray-700">Role</label>
                                 <select name="s_role" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
-                                    <option>Staff</option>
-                                    <option>Manager</option>
-                                    <option>Admin</option>
+                                    <option value="staff">Staff</option>
+                                    <option value="manager">Manager</option>
+                                    <option value="admin">Admin</option>
                                 </select>
                             </div>
-                            <x-button type="submit" size="sm" icon="check">Add User</x-button>
+                            <x-button type="button" size="sm" @click="roleChange()" icon="check">Change Role</x-button>
                         </form>
                     </div>
 
@@ -253,6 +253,42 @@
 
 @push('scripts')
     <script>
+        function roleChange() {
+            const email = document.querySelector('[name="s_email"]').value;
+            const role = document.querySelector('[name="s_role"]').value;
+            if (!email || !role) {
+                Alpine.store('toasts').notify('Please select a user and role.', 'error');
+                return;
+            }
+            try{
+                fetch("{{ route('controlpanel.settings.role-change') }}", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, role })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(data => {
+                            const message = data.message || (data.errors ? Object.values(data.errors).flat().join(', ') : 'Failed to change user role.');
+                            throw new Error(message);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log(data);
+                    Alpine.store('toasts').notify(data.message, 'success');
+                });
+            }
+            catch (error) {
+                Alpine.store('toasts').notify(error.message, 'error');
+            }
+        }
+
         function canvasToPngBlob(img, size) {
             return new Promise(resolve => {
                 const canvas = document.createElement('canvas');

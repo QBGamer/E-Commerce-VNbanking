@@ -18,6 +18,23 @@ class CPStoreController extends Controller
         ]);
     }
 
+    public function roleChange(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|exists:users,email',
+            'role' => 'required|in:admin,manager,staff', // Adjust roles as needed
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+        $user->role = $request->role;
+        $user->save();
+
+        return response()->json([
+            'user' => $user,
+            'message' => 'User role updated successfully.'
+            ]);
+    }
+
     // function call in AppserviceProvider boot() to share data with all views
     public static function data(): array
     {
