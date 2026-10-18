@@ -121,9 +121,6 @@
                         <h2 class="font-bold text-gray-900">Staff & Admin Accounts</h2>
                         <x-button size="sm" icon="plus" @click="showStaffForm = !showStaffForm">Add</x-button>
                     </div>
-                    {{-- @php
-                        echo $users;
-                    @endphp --}}
                     <div x-cloak x-show="showStaffForm" class="border-b border-gray-100 p-4">
                         <form class="grid grid-cols-1 gap-3">
                             <div x-data="{
@@ -179,33 +176,22 @@
                     </div>
 
                     <ul class="divide-y divide-gray-100">
-                        @php
-                            $staff = [
-                                ['name' => 'Admin Demo', 'email' => 'admin@shophub.demo', 'role' => 'Admin', 'color' => 'bg-indigo-600'],
-                                ['name' => 'Minh Nguyen', 'email' => 'minh@shophub.demo', 'role' => 'Manager', 'color' => 'bg-emerald-600'],
-                                ['name' => 'Lin Tran', 'email' => 'lin@shophub.demo', 'role' => 'Staff', 'color' => 'bg-amber-500'],
-                                ['name' => 'Kim Vo', 'email' => 'kim@shophub.demo', 'role' => 'Staff', 'color' => 'bg-blue-600'],
-                            ];
-                        @endphp
-                        @foreach ($staff as $member)
+                        <template x-for="user in users" :key="user.id">
                             <li class="flex items-center gap-3 px-6 py-3.5">
-                                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white {{ $member['color'] }}">
-                                    {{ collect(explode(' ', $member['name']))->map(fn($w) => strtoupper(substr($w, 0, 1)))->implode('') }}
-                                </span>
+                                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white" :class="avatarClass(user.id)" x-text="initials(user.name)"></span>
                                 <div class="min-w-0 flex-1">
-                                    <p class="truncate text-sm font-medium text-gray-800">{{ $member['name'] }}</p>
-                                    <p class="truncate text-xs text-gray-400">{{ $member['email'] }}</p>
+                                    <p class="truncate text-sm font-medium text-gray-800" x-text="user.name"></p>
+                                    <p class="truncate text-xs text-gray-400" x-text="user.email"></p>
                                 </div>
-                                <span class="rounded-full px-2.5 py-1 text-xs font-semibold {{ $member['role'] === 'Admin' ? 'bg-indigo-100 text-indigo-700' : ($member['role'] === 'Manager' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600') }}">
-                                    {{ $member['role'] }}
-                                </span>
+                                <span class="rounded-full px-2.5 py-1 text-xs font-semibold" :class="roleBadgeClass(user.role)" x-text="roleLabel(user.role)"></span>
                                 <form action="#" class="flex">
                                     <button type="button" class="rounded-lg p-2 text-gray-400 hover:bg-red-50 hover:text-red-600" title="Remove">
                                         <x-icons name="trash" class="w-4 h-4" />
                                     </button>
                                 </form>
                             </li>
-                        @endforeach
+                        </template>
+                        <li x-show="users.length === 0" class="px-6 py-8 text-center text-sm text-gray-400">No staff or admin accounts yet.</li>
                     </ul>
                 </section>
 
@@ -253,42 +239,6 @@
 
 @push('scripts')
     <script>
-        function roleChange() {
-            const email = document.querySelector('[name="s_email"]').value;
-            const role = document.querySelector('[name="s_role"]').value;
-            if (!email || !role) {
-                Alpine.store('toasts').notify('Please select a user and role.', 'error');
-                return;
-            }
-            try{
-                fetch("{{ route('controlpanel.settings.role-change') }}", {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ email, role })
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        return response.json().then(data => {
-                            const message = data.message || (data.errors ? Object.values(data.errors).flat().join(', ') : 'Failed to change user role.');
-                            throw new Error(message);
-                        });
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log(data);
-                    Alpine.store('toasts').notify(data.message, 'success');
-                });
-            }
-            catch (error) {
-                Alpine.store('toasts').notify(error.message, 'error');
-            }
-        }
-
         function canvasToPngBlob(img, size) {
             return new Promise(resolve => {
                 const canvas = document.createElement('canvas');
@@ -356,10 +306,62 @@
             Alpine.data('settingsPanel', () => ({
                 faviconPngs: [],
                 faviconPreviewSrc: @js($storeInfo['icon'] ?? null),
+                users: @js(collect($users ?? [])->filter(fn ($u) => in_array($u->role, ['staff', 'manager', 'admin']))->map(fn ($u) => ['id' => $u->id, 'name' => $u->name, 'email' => $u->email, 'role' => $u->role])->values()),
                 payments: { card: true, vnpay: true, paypal: true, cod: true, momo: false },
                 shipping: { standard: true, express: true, free: true, pickup: false },
                 prefs: { low_stock_alert: true, auto_return: false, new_order_notify: true },
                 showStaffForm: false,
+
+                initials(name) {
+                    return (name || '').split(' ').filter(Boolean).map(w => w[0].toUpperCase()).join('').slice(0, 2);
+                },
+                avatarClass(id) {
+                    const palette = ['bg-indigo-600', 'bg-emerald-600', 'bg-amber-500', 'bg-blue-600', 'bg-rose-500', 'bg-violet-600'];
+                    return palette[(Number(id) || 0) % palette.length];
+                },
+                roleBadgeClass(role) {
+                    return {
+                        admin: 'bg-indigo-100 text-indigo-700',
+                        manager: 'bg-emerald-100 text-emerald-700',
+                        staff: 'bg-amber-100 text-amber-700',
+                        customer: 'bg-gray-100 text-gray-600',
+                    }[role] || 'bg-gray-100 text-gray-600';
+                },
+                roleLabel(role) {
+                    return role ? role.charAt(0).toUpperCase() + role.slice(1) : '—';
+                },
+                async roleChange() {
+                    const email = document.querySelector('[name="s_email"]').value;
+                    const role = document.querySelector('[name="s_role"]').value;
+                    if (!email || !role) {
+                        Alpine.store('toasts').notify('Please select a user and role.', 'error');
+                        return;
+                    }
+                    try {
+                        const response = await fetch("{{ route('controlpanel.settings.role-change') }}", {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ email, role })
+                        });
+                        const data = await response.json();
+                        if (!response.ok) {
+                            throw new Error(data.message || (data.errors ? Object.values(data.errors).flat().join(', ') : 'Failed to change user role.'));
+                        }
+                        const index = this.users.findIndex(u => u.email === data.user.email);
+                        if (index !== -1) {
+                            this.users[index].role = data.user.role;
+                        } else if (['staff', 'manager', 'admin'].includes(data.user.role)) {
+                            this.users.push({ id: data.user.id, name: data.user.name, email: data.user.email, role: data.user.role });
+                        }
+                        Alpine.store('toasts').notify(data.message, 'success');
+                    } catch (error) {
+                        Alpine.store('toasts').notify(error.message, 'error');
+                    }
+                },
 
                 async uploadFavicon(input) {
                     const file = input.files && input.files[0];
