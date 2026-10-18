@@ -12,7 +12,8 @@ class CPStoreController extends Controller
 {
     public function index()
     {
-        $users = User::all();
+        // $users = User::all();
+        $users = User::where('email', '!=', auth()->user()->email)->orWhere('role', '!=', 'admin')->get();
         return view('controlpanel.settings',[
             'users' => $users,
         ]);
@@ -22,8 +23,24 @@ class CPStoreController extends Controller
     {
         $request->validate([
             'email' => 'required|exists:users,email',
-            'role' => 'required|in:admin,manager,staff', // Adjust roles as needed
+            'role' => 'required|in:manager,staff', // Adjust roles as needed
         ]);
+        $roleNum = [
+            'admin' => 0,
+            'manager' => 1,
+            'staff' => 2,
+            'customer' => 99,
+        ];
+        if ($roleNum[$request->role] <= $roleNum[auth()->user()->role]) {
+            return response()->json([
+                'message' => 'You cannot assign a role equal to or higher than your own.'
+            ], 403);
+        }
+        if (auth()->user()->email === $request->email) {
+            return response()->json([
+                'message' => 'You cannot change your own role.'
+            ], 403);
+        }
 
         $user = User::where('email', $request->email)->first();
         $user->role = $request->role;

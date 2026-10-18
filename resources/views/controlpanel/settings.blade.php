@@ -168,7 +168,7 @@
                                 <select name="s_role" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
                                     <option value="staff">Staff</option>
                                     <option value="manager">Manager</option>
-                                    <option value="admin">Admin</option>
+                                    {{-- <option value="admin">Admin</option> --}}
                                 </select>
                             </div>
                             <x-button type="button" size="sm" @click="roleChange()" icon="check">Change Role</x-button>
@@ -291,7 +291,7 @@
                     throw new Error(message);
                 }
                 Alpine.store('toasts').notify(data.message, 'success');
-                document.title = 'Settings · ' + document.querySelector('[name="store_name"]').value + ' Admin';
+                document.title = 'Settings · ' + document.querySelector('[name="store_name"]').value + ' Control Panel';
                 if (data.favicon_updated && data.url) {
                     panel.faviconPreviewSrc = data.url;
                     panel.faviconPngs = [];
@@ -306,7 +306,7 @@
             Alpine.data('settingsPanel', () => ({
                 faviconPngs: [],
                 faviconPreviewSrc: @js($storeInfo['icon'] ?? null),
-                users: @js(collect($users ?? [])->filter(fn ($u) => in_array($u->role, ['staff', 'manager', 'admin']))->map(fn ($u) => ['id' => $u->id, 'name' => $u->name, 'email' => $u->email, 'role' => $u->role])->values()),
+                users: @js(collect($users ?? [])->filter(fn ($u) => in_array($u->role, ['staff', 'manager']))->map(fn ($u) => ['id' => $u->id, 'name' => $u->name, 'email' => $u->email, 'role' => $u->role])->values()),
                 payments: { card: true, vnpay: true, paypal: true, cod: true, momo: false },
                 shipping: { standard: true, express: true, free: true, pickup: false },
                 prefs: { low_stock_alert: true, auto_return: false, new_order_notify: true },
@@ -354,7 +354,7 @@
                         const index = this.users.findIndex(u => u.email === data.user.email);
                         if (index !== -1) {
                             this.users[index].role = data.user.role;
-                        } else if (['staff', 'manager', 'admin'].includes(data.user.role)) {
+                        } else if (['staff', 'manager'].includes(data.user.role)) {
                             this.users.push({ id: data.user.id, name: data.user.name, email: data.user.email, role: data.user.role });
                         }
                         Alpine.store('toasts').notify(data.message, 'success');
