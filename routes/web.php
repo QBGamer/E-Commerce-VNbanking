@@ -43,7 +43,7 @@ Route::prefix('control-panel')->name('controlpanel.')->middleware(['auth', 'can:
     Route::view('/orders', 'controlpanel.orders')->name('orders');
     Route::view('/customers', 'controlpanel.customers')->name('customers');
     Route::view('/coupons', 'controlpanel.coupons')->name('coupons');
-    Route::prefix('settings')->name('settings.')->group(function () {
+    Route::prefix('settings')->name('settings.')->middleware('can:access-control-panel-admin')->group(function () {
         Route::get('/', [CPStoreController::class, 'index'])->name('index');
         Route::post('/', [CPStoreController::class, 'update'])->name('update');
         Route::post('/role-change', [CPStoreController::class, 'roleChange'])->name('role-change');

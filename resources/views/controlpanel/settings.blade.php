@@ -171,7 +171,7 @@
                                     {{-- <option value="admin">Admin</option> --}}
                                 </select>
                             </div>
-                            <x-button type="button" size="sm" @click="roleChange()" icon="check">Change Role</x-button>
+                            <x-button type="button" size="sm" @click="submitRoleChange()" icon="check">Change Role</x-button>
                         </form>
                     </div>
 
@@ -185,7 +185,7 @@
                                 </div>
                                 <span class="rounded-full px-2.5 py-1 text-xs font-semibold" :class="roleBadgeClass(user.role)" x-text="roleLabel(user.role)"></span>
                                 <form action="#" class="flex">
-                                    <button type="button" class="rounded-lg p-2 text-gray-400 hover:bg-red-50 hover:text-red-600" title="Remove">
+                                    <button type="button" class="rounded-lg p-2 text-gray-400 hover:bg-red-50 hover:text-red-600" title="Remove" @click="roleChange(user.email)"    >
                                         <x-icons name="trash" class="w-4 h-4" />
                                     </button>
                                 </form>
@@ -306,7 +306,7 @@
             Alpine.data('settingsPanel', () => ({
                 faviconPngs: [],
                 faviconPreviewSrc: @js($storeInfo['icon'] ?? null),
-                users: @js(collect($users ?? [])->filter(fn ($u) => in_array($u->role, ['staff', 'manager']))->map(fn ($u) => ['id' => $u->id, 'name' => $u->name, 'email' => $u->email, 'role' => $u->role])->values()),
+                users: @js(collect($users ?? [])->filter(fn ($u) => in_array($u->role, ['staff', 'manager', 'admin']))->map(fn ($u) => ['id' => $u->id, 'name' => $u->name, 'email' => $u->email, 'role' => $u->role])->values()),
                 payments: { card: true, vnpay: true, paypal: true, cod: true, momo: false },
                 shipping: { standard: true, express: true, free: true, pickup: false },
                 prefs: { low_stock_alert: true, auto_return: false, new_order_notify: true },
@@ -330,39 +330,36 @@
                 roleLabel(role) {
                     return role ? role.charAt(0).toUpperCase() + role.slice(1) : '—';
                 },
-                async roleChange() {
+                submitRoleChange() {
                     const email = document.querySelector('[name="s_email"]').value;
                     const role = document.querySelector('[name="s_role"]').value;
-                    if (!email || !role) {
-                        Alpine.store('toasts').notify('Please select a user and role.', 'error');
+                    return this.roleChange(email, role || null);
+                },
+                async roleChange(email, role = null) {
+                    if (!email) {
+                        Alpine.store('toasts').notify('Please select a user.', 'error');
                         return;
                     }
                     try {
                         const response = await fetch("{{ route('controlpanel.settings.role-change') }}", {
                             method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                'Accept': 'application/json',
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ email, role })
+                            headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email, role }),
                         });
                         const data = await response.json();
-                        if (!response.ok) {
-                            throw new Error(data.message || (data.errors ? Object.values(data.errors).flat().join(', ') : 'Failed to change user role.'));
-                        }
-                        const index = this.users.findIndex(u => u.email === data.user.email);
-                        if (index !== -1) {
-                            this.users[index].role = data.user.role;
-                        } else if (['staff', 'manager'].includes(data.user.role)) {
-                            this.users.push({ id: data.user.id, name: data.user.name, email: data.user.email, role: data.user.role });
+                        if (!response.ok) throw new Error(data.message || (data.errors ? Object.values(data.errors).flat().join(', ') : 'Failed to change user role.'));
+                        if (role === null) {
+                            this.users = this.users.filter(u => u.email !== email);      // gỡ khỏi staff -> customer
+                        } else {
+                            const index = this.users.findIndex(u => u.email === email);
+                            if (index !== -1) this.users[index].role = data.user.role;
+                            else this.users.push({ id: data.user.id, name: data.user.name, email: data.user.email, role: data.user.role });
                         }
                         Alpine.store('toasts').notify(data.message, 'success');
                     } catch (error) {
                         Alpine.store('toasts').notify(error.message, 'error');
                     }
                 },
-
                 async uploadFavicon(input) {
                     const file = input.files && input.files[0];
                     if (!file) return;

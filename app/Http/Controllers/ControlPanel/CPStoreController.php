@@ -12,8 +12,15 @@ class CPStoreController extends Controller
 {
     public function index()
     {
-        // $users = User::all();
-        $users = User::where('email', '!=', auth()->user()->email)->orWhere('role', '!=', 'admin')->get();
+        $users = User::all();
+        // $users = User::where('email', '!=', auth()->user()->email)->orWhere('role', '!=', 'admin')->get();
+        // change user name to 'you' if the user is the current user
+        $users->transform(function ($user) {
+            if ($user->email === auth()->user()->email) {
+                $user->name = 'You';
+            }
+            return $user;
+        });
         return view('controlpanel.settings',[
             'users' => $users,
         ]);
@@ -23,7 +30,7 @@ class CPStoreController extends Controller
     {
         $request->validate([
             'email' => 'required|exists:users,email',
-            'role' => 'required|in:manager,staff', // Adjust roles as needed
+            'role' => 'nullable|in:manager,staff', // Adjust roles as needed
         ]);
         $roleNum = [
             'admin' => 0,
@@ -31,6 +38,9 @@ class CPStoreController extends Controller
             'staff' => 2,
             'customer' => 99,
         ];
+        if ($request->role === null) {
+            $request->role = 'customer';
+        }
         if ($roleNum[$request->role] <= $roleNum[auth()->user()->role]) {
             return response()->json([
                 'message' => 'You cannot assign a role equal to or higher than your own.'
@@ -39,6 +49,11 @@ class CPStoreController extends Controller
         if (auth()->user()->email === $request->email) {
             return response()->json([
                 'message' => 'You cannot change your own role.'
+            ], 403);
+        }
+        if ($roleNum[User::where('email', $request->email)->first()->role] <= $roleNum[auth()->user()->role]) {
+            return response()->json([
+                'message' => 'You cannot assign a role equal to or higher than your own.'
             ], 403);
         }
 
