@@ -33,17 +33,22 @@ Route::prefix('cart')->name('cart.')->middleware('auth')->group(function () {
 });
 
 Route::prefix('control-panel')->name('controlpanel.')->middleware(['auth', 'can:access-control-panel'])->group(function () {
-    Route::view('/', 'controlpanel.dashboard')->name('dashboard');
-    Route::prefix('products')->name('products.')->group(function () {
+    Route::view('/', 'controlpanel.dashboard')->middleware('can:manager-access')->name('dashboard');
+
+    Route::prefix('products')->name('products.')->middleware('can:manager-access')->group(function () {
         Route::get('/', [CPProductController::class, 'index'])->name('index');
         Route::post('/', [CPProductController::class, 'store'])->name('store');
         Route::put('/{id}', [CPProductController::class, 'update'])->name('update');
         Route::delete('/{id}', [CPProductController::class, 'destroy'])->name('destroy');
     });
-    Route::view('/orders', 'controlpanel.orders')->name('orders');
-    Route::view('/customers', 'controlpanel.customers')->name('customers');
-    Route::view('/coupons', 'controlpanel.coupons')->name('coupons');
-    Route::prefix('settings')->name('settings.')->middleware('can:access-control-panel-admin')->group(function () {
+
+    Route::view('/orders', 'controlpanel.orders')->name('orders'); //this is staff and manager can access
+
+    Route::view('/customers', 'controlpanel.customers')->middleware('can:manager-access')->name('customers');
+
+    Route::view('/coupons', 'controlpanel.coupons')->middleware('can:manager-access')->name('coupons');
+
+    Route::prefix('settings')->name('settings.')->middleware('can:admin-access')->group(function () {
         Route::get('/', [CPStoreController::class, 'index'])->name('index');
         Route::post('/', [CPStoreController::class, 'update'])->name('update');
         Route::post('/role-change', [CPStoreController::class, 'roleChange'])->name('role-change');

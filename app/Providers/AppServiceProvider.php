@@ -26,10 +26,13 @@ class AppServiceProvider extends ServiceProvider
         View::share(CPStoreController::data());
         View::share(DemoData::data());
         Gate::define('access-control-panel', function ($user) {
-            return in_array($user->role, ['admin', 'manager']);
+            return in_array($user->role, ['admin', 'manager','staff']);
         });
-        Gate::define('access-control-panel-admin', function ($user) {
+        Gate::define('admin-access', function ($user) {
             return $user->role === 'admin';
+        });
+        Gate::define('manager-access', function ($user) {
+            return in_array($user->role, ['admin', 'manager']);
         });
     }
 }
