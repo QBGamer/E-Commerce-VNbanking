@@ -16,9 +16,9 @@ return new class extends Migration
             $table->decimal('subtotal', 10, 2);
             $table->decimal('discount', 10, 2)->default(0);
             $table->decimal('total', 10, 2);
-            $table->enum('payment_method', ['cod', 'card', 'paypal', 'momo']);
-            $table->enum('payment_status', ['pending', 'paid', 'failed', 'refunded'])->default('pending');
-            $table->enum('status', ['pending', 'processing', 'shipped', 'delivered', 'cancelled'])->default('pending');
+            $table->enum('payment_method', ['COD', 'Card', 'Paypal', 'Momo', 'VNPay'])->default('COD');
+            $table->enum('payment_status', ['Pending', 'Paid', 'Failed', 'Refunded'])->default('Pending');
+            $table->enum('status', ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'])->default('Pending');
             $table->json('shipping_address');
             $table->text('notes')->nullable();
             $table->timestamps();

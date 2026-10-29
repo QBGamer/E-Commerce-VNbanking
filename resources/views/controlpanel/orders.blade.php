@@ -4,17 +4,13 @@
 @php
     $statuses = ['All', 'Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
 
-    $ordersWithItems = collect($adminOrders)->map(function ($order) use ($products) {
-        $order['item_names'] = collect($products)->take($order['items'])->pluck('name')->all();
-        return $order;
-    })->all();
 @endphp
 
     <div x-data="ordersPanel()">
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <h2 class="text-lg font-bold text-gray-900">Manage Orders</h2>
-                <p class="text-sm text-gray-500">{{ count($adminOrders) }} orders</p>
+                <p class="text-sm text-gray-500">{{ count($orders_data) }} orders</p>
             </div>
             <div class="flex items-center gap-2">
                 <x-button variant="outline" size="md" icon="download">Export CSV</x-button>
@@ -29,7 +25,7 @@
                     :class="filter === '{{ $status }}' ? 'bg-indigo-600 text-white' : 'border border-gray-300 bg-white text-gray-600 hover:border-indigo-300'"
                     class="rounded-full px-4 py-2 text-sm font-medium transition-colors">
                     {{ $status }}
-                    <span class="ml-1 text-xs opacity-60">{{ $status === 'All' ? count($adminOrders) : collect($adminOrders)->where('status', $status)->count() }}</span>
+                    <span class="ml-1 text-xs opacity-60">{{ $status === 'All' ? count($orders_data) : collect($orders_data)->where('status', $status)->count() }}</span>
                 </button>
             @endforeach
         </div>
@@ -51,18 +47,18 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
-                        <template x-for="(order, i) in filteredOrders" :key="order.id">
+                        <template x-for="(orders_data, i) in filteredOrders" :key="orders_data.id">
                             <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-3.5 font-semibold text-indigo-600" x-text="order.id"></td>
-                                <td class="px-6 py-3.5 text-gray-700" x-text="order.customer"></td>
-                                <td class="px-6 py-3.5 text-gray-500" x-text="order.date"></td>
-                                <td class="px-6 py-3.5 text-gray-600" x-text="order.items"></td>
-                                <td class="px-6 py-3.5 font-medium text-gray-900" x-text="'$' + order.total.toFixed(2)"></td>
-                                <td class="px-6 py-3.5 text-gray-500" x-text="order.payment"></td>
+                                <td class="px-6 py-3.5 font-semibold text-indigo-600" x-text="orders_data.order_number"></td>
+                                <td class="px-6 py-3.5 text-gray-700" x-text="orders_data.user.name"></td>
+                                <td class="px-6 py-3.5 text-gray-500" x-text="new Date(orders_data.created_at).toLocaleDateString('vi-VN')"></td>
+                                <td class="px-6 py-3.5 text-gray-600" x-text="orders_data.products.length"></td>
+                                <td class="px-6 py-3.5 font-medium text-gray-900" x-text="'$' + orders_data.total"></td>
+                                <td class="px-6 py-3.5 text-gray-500" x-text="orders_data.payment_method"></td>
                                 <td class="px-6 py-3.5">
                                     <span class="rounded-full px-2.5 py-1 text-xs font-semibold text-white"
-                                        :class="{ 'bg-amber-500': order.status === 'Pending', 'bg-blue-500': order.status === 'Processing', 'bg-violet-500': order.status === 'Shipped', 'bg-emerald-500': order.status === 'Delivered', 'bg-red-500': order.status === 'Cancelled' }"
-                                        x-text="order.status"></span>
+                                        :class="{ 'bg-amber-500': orders_data.status === 'Pending', 'bg-blue-500': orders_data.status === 'Processing', 'bg-violet-500': orders_data.status === 'Shipped', 'bg-emerald-500': orders_data.status === 'Delivered', 'bg-red-500': orders_data.status === 'Cancelled' }"
+                                        x-text="orders_data.status"></span>
                                 </td>
                                 <td class="px-6 py-3.5">
                                     <div class="flex items-center justify-end gap-1">
@@ -89,8 +85,8 @@
                 <div class="relative z-10 max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-t-2xl bg-white sm:rounded-2xl">
                     <div class="sticky top-0 z-10 flex items-center justify-between border-b border-gray-100 bg-white px-6 py-4">
                         <div>
-                            <h3 class="text-lg font-bold text-gray-900" x-text="'Order ' + selected.id">Order Detail</h3>
-                            <p class="text-xs text-gray-400" x-text="'Placed on ' + selected.date + ' · ' + selected.payment"></p>
+                            <h3 class="text-lg font-bold text-gray-900" x-text="'Order ' + selected.order_number">Order Detail</h3>
+                            <p class="text-xs text-gray-400" x-text="'Placed on ' + new Date(selected.created_at).toLocaleDateString('vi-VN') + ' · ' + selected.payment_method"></p>
                         </div>
                         <button type="button" @click="selected = null" class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700">
                             <x-icons name="x" class="w-5 h-5" />
@@ -104,8 +100,8 @@
                                     <x-icons name="package" class="w-5 h-5" />
                                 </span>
                                 <div>
-                                    <p class="font-semibold text-gray-900" x-text="selected.customer"></p>
-                                    <p class="text-sm text-gray-400" x-text="selected.items + ' item(s)'"></p>
+                                    <p class="font-semibold text-gray-900" x-text="selected.user.name"></p>
+                                    <p class="text-sm text-gray-400" x-text="selected.products.length + ' product(s)'"></p>
                                 </div>
                             </div>
                             <div>
@@ -127,21 +123,24 @@
                         <div class="mt-6 rounded-xl border border-gray-100 bg-gray-50 p-4">
                             <h4 class="text-xs font-semibold uppercase tracking-wide text-gray-400">Shipping address</h4>
                             <p class="mt-2 text-sm text-gray-700">
-                                <span class="font-semibold text-gray-800" x-text="selected.customer"></span><br />
-                                123 Market Street, District 1<br />
+                                <span class="font-semibold text-gray-800" x-text="selected.user.name"></span><br/>
+                                {{-- {"city": "Hanoi", "phone": "+84 903 333 333", "country": "Vietnam",
+                                "full_name": "Jane Doe", "address_line": "77 Ba Trieu Street"} --}}
+                                123 Market Street, District 1
                                 Ho Chi Minh City, Vietnam 700000
                             </p>
                         </div>
 
                         <div class="mt-6">
-                            <h4 class="text-xs font-semibold uppercase tracking-wide text-gray-400">Items</h4>
+                            <h4 class="text-xs font-semibold uppercase tracking-wide text-gray-400">Products</h4>
                             <ul class="mt-3 space-y-3">
-                                <template x-for="(item, i) in selected.item_names" :key="i">
+                                <template x-for="(product, i) in selected.products" :key="product.id">
                                     <li class="flex items-center gap-3 text-sm">
                                         <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 text-gray-400">
-                                            <x-icons name="box" class="w-5 h-5" />
+                                            {{-- <x-icons name="box" class="w-5 h-5" /> --}}
+                                            <img :src="product.images[0]?.url ?? 'https://placehold.co/600x600?text=No+Image'" alt="" class="h-10 w-10 rounded-lg object-cover">
                                         </span>
-                                        <span class="flex-1 text-gray-800" x-text="item"></span>
+                                        <span class="flex-1 text-gray-800" x-text="product.name"></span>
                                     </li>
                                 </template>
                             </ul>
@@ -152,13 +151,13 @@
                                 <span>Subtotal</span>
                                 <span x-text="'$' + (selected.total * 0.9).toFixed(2)"></span>
                             </div>
-                            <div class="flex justify-between text-gray-500">
+                            {{-- <div class="flex justify-between text-gray-500">
                                 <span>Shipping</span>
                                 <span class="font-medium text-emerald-600">Free</span>
-                            </div>
+                            </div> --}}
                             <div class="flex justify-between pt-2 text-base font-bold text-gray-900">
                                 <span>Total</span>
-                                <span x-text="'$' + selected.total.toFixed(2)"></span>
+                                <span x-text="'$' + selected.total"></span>
                             </div>
                         </div>
 
@@ -176,7 +175,7 @@
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('ordersPanel', () => ({
-                orders: @json($ordersWithItems),
+                orders: @json($orders_data),
                 filter: 'All',
                 selected: null,
 

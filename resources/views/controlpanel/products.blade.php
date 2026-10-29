@@ -24,18 +24,11 @@
                         ? 'bg-indigo-600 text-white'
                         : 'border border-gray-300 bg-white text-gray-600 hover:border-indigo-300';
                 @endphp
-                <a href="{{ route('controlpanel.products.index') }}" class="rounded-full px-4 py-2 text-sm font-medium {{ $chip($isAll) }}">All</a>
+                {{-- <a href="{{ route('controlpanel.products.index') }}" class="rounded-full px-4 py-2 text-sm font-medium {{ $chip($isAll) }}">All</a>
                 <a href="{{ $queryUrl(['status' => 'active']) }}" class="rounded-full px-4 py-2 text-sm font-medium {{ $chip($isActive) }}">Active</a>
                 <a href="{{ $queryUrl(['stock' => 'low']) }}" class="rounded-full px-4 py-2 text-sm font-medium {{ $chip($isLow) }}">Low Stock</a>
-                <a href="{{ $queryUrl(['status' => 'inactive']) }}" class="rounded-full px-4 py-2 text-sm font-medium {{ $chip($isOut) }}">Out of Stock</a>
+                <a href="{{ $queryUrl(['status' => 'inactive']) }}" class="rounded-full px-4 py-2 text-sm font-medium {{ $chip($isOut) }}">Out of Stock</a> --}}
             </div>
-            <p class="text-sm text-gray-500" id="product-count">
-                @if (count($products))
-                    Showing <span class="font-semibold text-gray-800">{{ count($products) }}</span> of {{ $total }} products
-                @else
-                    No results
-                @endif
-            </p>
         </div>
 
         <form method="GET" action="{{ route('controlpanel.products.index') }}" class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
@@ -86,6 +79,13 @@
                 <x-button type="submit">Apply Filters</x-button>
                 <a href="{{ route('controlpanel.products.index') }}" class="inline-flex items-center rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50">Reset</a>
             </div>
+            <p class="text-sm text-gray-500 col-span-2 text-right" id="product-count">
+                @if (count($products))
+                    Showing <span class="font-semibold text-gray-800">{{ count($products) }}</span> of {{ $total }} products
+                @else
+                    No results
+                @endif
+            </p>
         </form>
     </div>
     @if ($products->hasPages())

@@ -7,6 +7,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartItemController;
 use App\Http\Controllers\ControlPanel\CPProductController;
 use App\Http\Controllers\ControlPanel\CPStoreController;
+use App\Http\Controllers\ControlPanel\CPOrderController;
 // use App\Http\Controllers\ControlPanelController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -42,7 +43,12 @@ Route::prefix('control-panel')->name('controlpanel.')->middleware(['auth', 'can:
         Route::delete('/{id}', [CPProductController::class, 'destroy'])->name('destroy');
     });
 
-    Route::view('/orders', 'controlpanel.orders')->name('orders'); //this is staff and manager can access
+    Route::prefix('orders')->name('orders.')->group(function () {
+        Route::get('/', [CPOrderController::class, 'index'])->name('index');
+        // Route::get('/{id}', [CPOrderController::class, 'show'])->name('show');
+        Route::put('/{id}', [CPOrderController::class, 'update'])->name('update');
+    });
+    // Route::view('/orders', 'controlpanel.orders')->name('orders'); //this is staff and manager can access
 
     Route::view('/customers', 'controlpanel.customers')->middleware('can:manager-access')->name('customers');
 

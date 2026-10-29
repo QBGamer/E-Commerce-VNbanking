@@ -16,7 +16,7 @@
             $menu = [
                 ['route' => 'controlpanel.dashboard', 'label' => 'Dashboard', 'icon' => 'dashboard'],
                 ['route' => 'controlpanel.products.index', 'label' => 'Products', 'icon' => 'box'],
-                ['route' => 'controlpanel.orders', 'label' => 'Orders', 'icon' => 'receipt'],
+                ['route' => 'controlpanel.orders.index', 'label' => 'Orders', 'icon' => 'receipt'],
                 ['route' => 'controlpanel.customers', 'label' => 'Customers', 'icon' => 'users'],
                 ['route' => 'controlpanel.coupons', 'label' => 'Coupons', 'icon' => 'tag'],
                 ['route' => 'controlpanel.settings.index', 'label' => 'Settings', 'icon' => 'settings'],
@@ -28,7 +28,7 @@
                 class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors {{ $active ? 'bg-indigo-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}">
                 <x-icons :name="$item['icon']" class="w-5 h-5 {{ $active ? 'text-white' : 'text-gray-400 group-hover:text-gray-600' }}" />
                 {{ $item['label'] }}
-                @if ($item['route'] === 'controlpanel.orders')
+                @if ($item['route'] === 'controlpanel.orders.index')
                     <span class="ml-auto rounded-full px-2 py-0.5 text-[11px] font-semibold {{ $active ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-700' }}">{{ count($adminOrders) }}</span>
                 @endif
             </a>
