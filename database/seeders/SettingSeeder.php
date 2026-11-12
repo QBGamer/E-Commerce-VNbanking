@@ -17,6 +17,7 @@ class SettingSeeder extends Seeder
             ['key' => 'support_email', 'value' => 'support@shoply.demo', 'group' => 'store', 'created_at' => now(), 'updated_at' => now()],
             ['key' => 'support_phone', 'value' => '+84 900 000 000', 'group' => 'store', 'created_at' => now(), 'updated_at' => now()],
             ['key' => 'store_address', 'value' => '123 Market Street, District 1, Ho Chi Minh City', 'group' => 'store', 'created_at' => now(), 'updated_at' => now()],
+            ['key' => 'store_icon', 'value' => '/storage/icon.ico', 'group' => 'store', 'created_at' => now(), 'updated_at' => now()],
             ['key' => 'payment_methods', 'value' => json_encode(['cod', 'card', 'paypal', 'momo']), 'group' => 'payment', 'created_at' => now(), 'updated_at' => now()],
         ]);
     }

@@ -8,6 +8,7 @@ use App\Http\Controllers\CartItemController;
 use App\Http\Controllers\ControlPanel\CPProductController;
 use App\Http\Controllers\ControlPanel\CPStoreController;
 use App\Http\Controllers\ControlPanel\CPOrderController;
+use App\Http\Controllers\ControlPanel\CPCustomerController;
 // use App\Http\Controllers\ControlPanelController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -50,7 +51,11 @@ Route::prefix('control-panel')->name('controlpanel.')->middleware(['auth', 'can:
     });
     // Route::view('/orders', 'controlpanel.orders')->name('orders'); //this is staff and manager can access
 
-    Route::view('/customers', 'controlpanel.customers')->middleware('can:manager-access')->name('customers');
+    // Route::view('/customers', 'controlpanel.customers')->middleware('can:manager-access')->name('customers');
+    Route::prefix('customers')->name('customers.')->middleware('can:manager-access')->group(function () {
+        Route::get('/', [CPCustomerController::class, 'index'])->name('index');
+        Route::post('/', [CPCustomerController::class, 'update'])->name('update');
+    });
 
     Route::view('/coupons', 'controlpanel.coupons')->middleware('can:manager-access')->name('coupons');
 

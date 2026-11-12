@@ -17,7 +17,7 @@
                 ['route' => 'controlpanel.dashboard', 'label' => 'Dashboard', 'icon' => 'dashboard'],
                 ['route' => 'controlpanel.products.index', 'label' => 'Products', 'icon' => 'box'],
                 ['route' => 'controlpanel.orders.index', 'label' => 'Orders', 'icon' => 'receipt'],
-                ['route' => 'controlpanel.customers', 'label' => 'Customers', 'icon' => 'users'],
+                ['route' => 'controlpanel.customers.index', 'label' => 'Customers', 'icon' => 'users'],
                 ['route' => 'controlpanel.coupons', 'label' => 'Coupons', 'icon' => 'tag'],
                 ['route' => 'controlpanel.settings.index', 'label' => 'Settings', 'icon' => 'settings'],
             ];

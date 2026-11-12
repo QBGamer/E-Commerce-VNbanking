@@ -5,30 +5,31 @@
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <h2 class="text-lg font-bold text-gray-900">Customers</h2>
-                <p class="text-sm text-gray-500">{{ count($adminCustomers) }} registered customers</p>
+                <p class="text-sm text-gray-500">{{ $totalCustomers }} registered customers</p>
             </div>
-            <x-button icon="user-plus">Invite Customer</x-button>
         </div>
-
+        @php
+            echo $customers;
+        @endphp
         <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div class="flex items-center gap-4 rounded-2xl border border-gray-200 bg-white p-5">
                 <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600"><x-icons name="users" class="w-5 h-5" /></span>
                 <div>
-                    <p class="text-xl font-bold text-gray-900">{{ count($adminCustomers) }}</p>
+                    <p class="text-xl font-bold text-gray-900">{{ count($customers) }}</p>
                     <p class="text-xs text-gray-500">Total customers</p>
                 </div>
             </div>
             <div class="flex items-center gap-4 rounded-2xl border border-gray-200 bg-white p-5">
                 <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600"><x-icons name="trending-up" class="w-5 h-5" /></span>
                 <div>
-                    <p class="text-xl font-bold text-gray-900">{{ collect($adminCustomers)->where('status', 'Active')->count() }}</p>
+                    <p class="text-xl font-bold text-gray-900">{{ collect($customers)->where('status', 'active')->count() }}</p>
                     <p class="text-xs text-gray-500">Active customers</p>
                 </div>
             </div>
             <div class="flex items-center gap-4 rounded-2xl border border-gray-200 bg-white p-5">
                 <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-100 text-amber-600"><x-icons name="dollar-sign" class="w-5 h-5" /></span>
                 <div>
-                    <p class="text-xl font-bold text-gray-900">${{ number_format(collect($adminCustomers)->sum('spent'), 0) }}</p>
+                    <p class="text-xl font-bold text-gray-900">${{ number_format(collect($customers)->pluck('orders')->flatten(1)->sum('total'), 0) }}</p>
                     <p class="text-xs text-gray-500">Total lifetime value</p>
                 </div>
             </div>
