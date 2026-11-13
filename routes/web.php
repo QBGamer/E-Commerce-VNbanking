@@ -11,6 +11,11 @@ use App\Http\Controllers\ControlPanel\CPOrderController;
 use App\Http\Controllers\ControlPanel\CPCustomerController;
 // use App\Http\Controllers\ControlPanelController;
 
+Route::get('/test404', function () {
+    abort(404, 'This is a custom 404 error message.');
+});
+
+
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::view('/login', 'auth.login')->name('login');
@@ -54,7 +59,7 @@ Route::prefix('control-panel')->name('controlpanel.')->middleware(['auth', 'can:
     // Route::view('/customers', 'controlpanel.customers')->middleware('can:manager-access')->name('customers');
     Route::prefix('customers')->name('customers.')->middleware('can:manager-access')->group(function () {
         Route::get('/', [CPCustomerController::class, 'index'])->name('index');
-        Route::post('/', [CPCustomerController::class, 'update'])->name('update');
+        Route::post('/{id}', [CPCustomerController::class, 'update'])->name('update');
     });
 
     Route::view('/coupons', 'controlpanel.coupons')->middleware('can:manager-access')->name('coupons');
