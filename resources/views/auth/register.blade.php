@@ -12,6 +12,13 @@
                 <p class="mt-1 text-sm text-gray-500">Join ShopHub in less than a minute</p>
             </div>
 
+            @if ($errors->any())
+                <div class="mb-5 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                    <x-icons name="alert-triangle" class="w-4 h-4 mt-0.5 shrink-0" />
+                    <span>{{ $errors->first() }}</span>
+                </div>
+            @endif
+
             <form action="{{ route('register') }}" method="POST" class="space-y-5">
                 @csrf
                 <x-form-input name="name" label="Full name" icon="user" placeholder="Jane Doe" autocomplete="name" required />
@@ -40,3 +47,13 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+    {{-- <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            @if ($errors->any())
+                Alpine.store('toasts').notify(@js($errors->first()), 'error');
+            @endif
+        });
+    </script> --}}
+@endpush

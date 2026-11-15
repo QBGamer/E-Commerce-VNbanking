@@ -49,7 +49,12 @@ class CPCustomerController extends Controller
             'status' => 'required|in:active,inactive',
         ]);
 
-        $customer = User::where('role', 'customer')->findOrFail($id);
+        $customer = User::findOrFail($id);
+
+        if ($customer->id === auth()->id() && $request->status !== $customer->status) {
+            return response()->json(['message' => 'You cannot update your own status.'], 403);
+        }
+
         $customer->update($request->only(['name', 'phone', 'status']));
         $customer->load('orders.products');
 

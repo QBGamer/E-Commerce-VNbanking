@@ -12,9 +12,16 @@
                 <p class="mt-1 text-sm text-gray-500">Sign in to your account to continue</p>
             </div>
 
+            @if ($errors->any())
+                <div class="mb-5 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                    <x-icons name="alert-triangle" class="w-4 h-4 mt-0.5 shrink-0" />
+                    <span>{{ $errors->first() }}</span>
+                </div>
+            @endif
+
             <form action="{{ route('login') }}" method="POST" class="space-y-5">
                 @csrf
-                <x-form-input name="email" label="Email address" type="email" icon="mail" placeholder="you@example.com" autocomplete="email" required />
+                <x-form-input name="email" label="Email address" type="email" icon="mail" placeholder="you@example.com" autocomplete="email" :value="old('email')" required />
                 <x-form-input name="password" label="Password" type="password" icon="lock" placeholder="••••••••" autocomplete="current-password" toggle-password required />
 
                 <div class="flex items-center justify-between">
@@ -38,3 +45,13 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+    {{-- <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            @if ($errors->any())
+                Alpine.store('toasts').notify(@js($errors->first()), 'error');
+            @endif
+        });
+    </script> --}}
+@endpush

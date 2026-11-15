@@ -2,9 +2,9 @@
 
 @section('content')
     <div x-data="customersPanel()">
-        @php
+        {{-- @php
             echo $customers;
-        @endphp
+        @endphp --}}
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <h2 class="text-lg font-bold text-gray-900">Customers</h2>
@@ -204,16 +204,10 @@
                         </template>
 
                         <div class="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-end">
-                            <a :href="'mailto:' + selected.email"
+                            {{-- <a :href="'mailto:' + selected.email"
                                 class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
                                 <x-icons name="mail" class="w-4 h-4" /> Send Email
-                            </a>
-                            @if (auth()->user()->role === 'admin')
-                                <button type="button" @click="addToStaff(selected)"
-                                    class="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50">
-                                    <x-icons name="user-plus" class="w-4 h-4" /> Add as Staff
-                                </button>
-                            @endif
+                            </a> --}}
                             <button type="button" @click="toggleStatus(selected)"
                                 class="inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white"
                                 :class="selected.status === 'active' ? 'bg-red-600 hover:bg-red-700' : 'bg-emerald-600 hover:bg-emerald-700'">
@@ -334,22 +328,6 @@
                     const index = this.customers.findIndex(c => c.id === updated.id);
                     if (index !== -1) this.customers.splice(index, 1, updated);
                     if (this.selected && this.selected.id === updated.id) this.selected = { ...updated };
-                },
-                async addToStaff(customer) {
-                    try {
-                        const response = await fetch("{{ route('controlpanel.settings.role-change') }}", {
-                            method: 'POST',
-                            headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json', 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ email: customer.email, role: 'staff' }),
-                        });
-                        const data = await response.json();
-                        if (!response.ok) throw new Error(data.message || 'Failed to add customer as staff.');
-                        this.customers = this.customers.filter(c => c.id !== customer.id);
-                        this.closeModal();
-                        Alpine.store('toasts').notify(data.message, 'success');
-                    } catch (error) {
-                        Alpine.store('toasts').notify(error.message, 'error');
-                    }
                 },
             }));
         });

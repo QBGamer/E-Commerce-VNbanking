@@ -35,6 +35,8 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
+        $credentials['status'] = 'active';
+
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
             return redirect()->intended(route('home'));
