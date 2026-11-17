@@ -9,9 +9,6 @@
     <div x-data="ordersPanel()">
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                @php
-                    echo $orders_data;
-                @endphp
                 <h2 class="text-lg font-bold text-gray-900">Manage Orders</h2>
                 <p class="text-sm text-gray-500">{{ count($orders_data) }} orders</p>
             </div>
