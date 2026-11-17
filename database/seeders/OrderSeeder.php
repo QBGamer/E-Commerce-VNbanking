@@ -15,11 +15,8 @@ class OrderSeeder extends Seeder
         DB::table('orders')->delete();
 
         $address = [
-            'full_name' => 'Jane Doe',
             'phone' => '+84 903 333 333',
-            'address_line' => '77 Ba Trieu Street',
-            'city' => 'Hanoi',
-            'country' => 'Vietnam',
+            'address' => '77 Ba Trieu Street',
         ];
 
         DB::table('orders')->insert([

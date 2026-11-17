@@ -9,6 +9,9 @@
     <div x-data="ordersPanel()">
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
+                @php
+                    echo $orders_data;
+                @endphp
                 <h2 class="text-lg font-bold text-gray-900">Manage Orders</h2>
                 <p class="text-sm text-gray-500">{{ count($orders_data) }} orders</p>
             </div>
@@ -100,34 +103,53 @@
                                     <x-icons name="package" class="w-5 h-5" />
                                 </span>
                                 <div>
-                                    <p class="font-semibold text-gray-900" x-text="selected.user.name"></p>
                                     <p class="text-sm text-gray-400" x-text="selected.products.length + ' product(s)'"></p>
                                 </div>
                             </div>
-                            <div>
-                                <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-gray-400">Update status</label>
-                                <div class="flex items-center gap-2">
-                                    <select x-model="selected.status"
-                                        class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
-                                        <option>Pending</option>
-                                        <option>Processing</option>
-                                        <option>Shipped</option>
-                                        <option>Delivered</option>
-                                        <option>Cancelled</option>
-                                    </select>
-                                    <x-button type="button" size="sm" icon="check">Update</x-button>
+                            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
+                                <div>
+                                    <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-gray-400">Payment Method</label>
+                                    <div class="flex items-center gap-2">
+                                        <span x-text="selected.payment_method"
+                                            class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+                                        </span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-gray-400">Payment Status</label>
+                                    <div class="flex items-center gap-2">
+                                        <select x-model="selected.payment_status"
+                                            class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+                                            <option>Pending</option>
+                                            <option>Paid</option>
+                                            <option>Failed</option>
+                                            <option>Returned</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-gray-400">Status</label>
+                                    <div class="flex items-center gap-2">
+                                        <select x-model="selected.status"
+                                            class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+                                            <option>Pending</option>
+                                            <option>Processing</option>
+                                            <option>Shipped</option>
+                                            <option>Delivered</option>
+                                            <option>Cancelled</option>
+                                        </select>
+                                        {{-- <x-button type="button" size="sm" icon="check">Update</x-button> --}}
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <div class="mt-6 rounded-xl border border-gray-100 bg-gray-50 p-4">
-                            <h4 class="text-xs font-semibold uppercase tracking-wide text-gray-400">Shipping address</h4>
+                            <h4 class="text-xs font-semibold uppercase tracking-wide text-gray-400">Shipping</h4>
                             <p class="mt-2 text-sm text-gray-700">
                                 <span class="font-semibold text-gray-800" x-text="selected.user.name"></span><br/>
-                                {{-- {"city": "Hanoi", "phone": "+84 903 333 333", "country": "Vietnam",
-                                "full_name": "Jane Doe", "address_line": "77 Ba Trieu Street"} --}}
-                                123 Market Street, District 1
-                                Ho Chi Minh City, Vietnam 700000
+                                <span x-text="selected.shipping_address.address"></span><br/>
+                                <span x-text="selected.shipping_address.phone"></span>
                             </p>
                         </div>
 
@@ -159,11 +181,9 @@
                                 <span>Total</span>
                                 <span x-text="'$' + selected.total"></span>
                             </div>
-                        </div>
-
-                        <div class="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-end">
-                            <x-button variant="outline" icon="print">Print Invoice</x-button>
-                            <x-button variant="outline" icon="mail">Email Customer</x-button>
+                            <div class="mt-4 flex justify-end">
+                                <x-button type="button" variant="primary" size="md" icon="check">Update</x-button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -186,7 +206,7 @@
 
                 openOrder(index) {
                     const order = this.orders[this.orders.indexOf(this.filteredOrders[index])];
-                    this.selected = order ? { ...order } : null;
+                    this.selected = order ? { ...order,shipping_address: JSON.parse(order.shipping_address) } : null;
                 },
             }));
         });
